@@ -1,0 +1,84 @@
+
+<div class="main-container mt-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold text-primary">POSly: Inventory Dashboard</h1>
+    <%= link_to "+ New Product", new_product_path, class: "btn btn-success btn-lg shadow-sm" %>
+  </div>
+
+  <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+  <%= form_with url: products_path, method: :get, local: true, class: "search-form" do |f| %>
+    <%= f.text_field :search,
+        value: params[:search],
+        placeholder: "พิมพ์ชื่อสินค้าหรือ SKU...",
+        style: "padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;"
+    %>
+    <%= f.submit "Search",
+        style: "padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;"
+    %>
+
+    <% if params[:search].present? %>
+      <%= link_to "Clear", products_path, style: "margin-left: 10px; color: #666; text-decoration: none;" %>
+    <% end %>
+  <% end %>
+</div>
+<div class="table-responsive shadow-sm rounded">
+    <!-- สร้างให้ท้ังแถวสามารถคลิกแล้วลิ้งไปที่หน้าโชว์รายละเอียด -->
+    <table class="table table-hover table-bordered align-middle">
+      <thead class="table-light">
+        <tr class="text-center">
+          <th>SKU</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Current Stock</th> </tr>
+      </thead>
+      <tbody>
+        <% @products.each do |product| %>
+          <tr class="clickable-row" data-href="<%= product_path(product) %>" style="cursor: pointer;">
+            <td class="text-center fw-medium"><%= product.sku %></td>
+            <td class="text-start"><%= product.name %></td>
+            <td class="text-start text-muted"><%= product.description %></td>
+            <td class="text-end text-primary fw-bold">
+              <%= number_to_currency(product.price, unit: "฿") %>
+            </td>
+            <td class="text-center">
+              <span class="badge <%= product.quantity < 10 ? 'bg-danger' : 'bg-success' %>">
+                <%= product.quantity %>
+              </span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<script>
+  // เปลี่ยนจาก DOMContentLoaded เป็น turbo:load
+  document.addEventListener("turbo:load", () => {
+    const rows = document.querySelectorAll(".clickable-row");
+    rows.forEach(row => {
+      row.addEventListener("click", () => {
+        const url = row.dataset.href;
+        if (url) {
+          // ใช้ Turbo.visit แทน window.location เพื่อความเร็วและสมบูรณ์ของระบบ Turbo
+          Turbo.visit(url);
+        }
+      });
+    });
+  });
+</script>
+<!--
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const rows = document.querySelectorAll(".clickable-row");
+    rows.forEach(row => {
+      row.addEventListener("click", () => {
+        // เมื่อคลิก จะดึงค่าจาก data-href แล้วเปลี่ยนหน้าเว็บไปที่นั่น
+        window.location.href = row.dataset.href;
+      });
+    });
+  });
+</script>
+-->

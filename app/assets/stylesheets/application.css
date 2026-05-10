@@ -1,0 +1,37 @@
+/*
+ * This is a manifest file that'll be compiled into application.css.
+ *
+ * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
+ * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
+ * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
+ * depending on specificity.
+ *
+ * Consider organizing styles into separate files for maintainability.
+ */
+
+  .main-container {
+    padding: 10px;      /* 1. ขยับจากขอบ บน ขวา ล่าง ซ้าย เข้ามา 40px */
+    max-width: 1550px;  /* 2. กำหนดความกว้างสูงสุดไม่ให้แผ่จนเกินไปเมื่อเปิดจอใหญ่ */
+    margin: 0 auto;     /* 3. จัดกึ่งกลางหน้าจอ */
+  }
+
+  .inventory-table {
+    width: 100%;            /* ขยายตารางให้กว้างไปทางขวาสุดหน้าจอ */
+    border-collapse: collapse;
+    font-family: sans-serif;
+  }
+
+  .inventory-table th {
+    background-color: #e8e8e8; /* สีพื้นหลังหัวตาราง */
+    font-size: 18px;          /* 1. เพิ่มขนาดตัวอักษร */
+    padding: 15px 10px;       /* 2. ขยายแถวให้สูงขึ้น (บน-ล่าง 20px) */
+    border: 1px solid #999;
+    text-align: center;
+  }
+
+  .inventory-table td {
+    padding: 10px 8px;       /* ขยายแถวข้อมูลให้สูงขึ้นด้วย */
+    border: 1px solid #ccc;
+    text-align: center;
+    font-size: 14px;          /* ขนาดตัวอักษรข้อมูล */
+  }

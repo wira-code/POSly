@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  product: one
+  change_amount: 1
+  log_type: MyString
+  note: MyString
+
+two:
+  product: two
+  change_amount: 1
+  log_type: MyString
+  note: MyString

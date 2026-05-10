@@ -1,0 +1,67 @@
+
+<div class="main-container mt-3">
+  <div style="padding: 20px; font-family: sans-serif;">
+    <%= link_to "← Back to Dashboard", products_path %>
+    <div class="d-flex justify-content-start align-items-center gap-3">
+      <h1 class="fw-bold mt-2"><%= @product.name %></h1>
+      <%= link_to edit_product_path(@product) do %>
+      <i class="fa-solid fa-pencil text-primary"></i>
+      <% end %>
+      <%= link_to product_path( @product),
+        data: { turbo_method: :delete,
+        turbo_confirm: "Are you sure?" }, title: "Delete" do %>
+        <i class="fa-solid fa-trash text-danger"></i>
+      <% end %>
+    </div>
+    <div class="d-flex justify-content-between">
+      <p><strong>SKU:</strong> <%= @product.sku %></p>
+      <p class="text-primary"><strong>Price:</strong> <%= number_to_currency(@product.price, unit: "฿") %></p>
+      <p style="font-size: 18px;">Current Stock:
+        <span class="badge <%= @product.quantity < 10 ? 'bg-danger' : 'bg-success' %>"><%= @product.quantity %></span>
+      </p>
+    </div>
+
+    <hr class="mt-0 mb-3">
+
+    <h3>Update Stock</h3>
+    <%= form_with url: update_stock_product_path(@product), method: :post do |f| %>
+    <div class="d-flex justify_content-space-around gap-4 mt-2">
+      <div style="margin-bottom: 10px;">
+        <label class="mb-2">Amount (ใส่ - เพื่อลดสต็อก):</label><br>
+        <%= f.number_field :amount, value: 1, style: "padding: 10px; font-size: 18px;" %>
+      </div>
+      <div style="margin-bottom: 10px;">
+        <label  class="mb-2">Note:</label><br>
+        <%= f.text_field :note, placeholder: "Reason of change", style: "padding: 10px; width: 1220px; font-size: 18px;" %>
+      </div>
+    </div>
+      <%= f.submit "Update Stock", style: "padding: 10px 20px; background-color: #28a745; border-radius: 4px; color: white; border: none; cursor: pointer; font-size: 16px;" %>
+    <% end %>
+
+    <hr>
+
+    <h3>Recent Stock Logs (History)</h3>
+    <table border="1" style="width: 100%; border-collapse: collapse;">
+      <thead style="background-color: #eee;">
+        <tr>
+          <th>Date</th>
+          <th>Change</th>
+          <th>Type</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @stock_logs.each do |log| %>
+          <tr>
+            <td><%= log.created_at.strftime("%B %d, %Y %H:%M") %></td>
+            <td style="color: <%= log.change_amount > 0 ? 'green' : 'red' %>">
+              <%= log.change_amount > 0 ? "+#{log.change_amount}" : log.change_amount %>
+            </td>
+            <td><%= log.log_type %></td>
+            <td><%= log.note %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
