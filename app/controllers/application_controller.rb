@@ -1,7 +1,4 @@
 class ApplicationController < ActionController::Base
-  # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-  allow_browser versions: :modern
-
-  # Changes to the importmap will invalidate the etag for HTML responses
-  stale_when_importmap_changes
+  # หากคุณมีคำสั่งเดิม เช่นการจัดการสิทธิ์ หรือการตั้งค่า Locale
+  # ให้ลองนึกและเติมลงไปที่นี่ (ถ้าไม่มี ให้ปล่อยว่างไว้แบบนี้ครับ)
 end

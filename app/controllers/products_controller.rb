@@ -1,6 +1,6 @@
 class ProductsController < ApplicationController
   # skip_before_action :authenticate_user!, only: [ :index, :show ]
-  # before_action :set_product
+  before_action :set_product, only: [ :show, :edit, :update, :destroy, :update_stock ]
   # before_action :product_params
 
   def index # แสดงรายการสินค้าทั้งหมด
@@ -9,6 +9,11 @@ class ProductsController < ApplicationController
       @products = Product.where("name ILIKE ? OR sku ILIKE ?", "%#{params[:search]}%", "%#{params[:search]}%")
     else
       @products = Product.all
+    end
+
+    # ตัวอย่างการ Filter ตามจำนวนสินค้า (Low Stock)
+    if params[:filter] == "low_stock"
+      @products = @products.where("quantity <= 5")
     end
     # .order(:created_at => :asc) คือเรียงจากเก่าไปใหม่ (อันใหม่จะอยู่ล่างสุด)
     @products = @products.order(created_at: :asc)

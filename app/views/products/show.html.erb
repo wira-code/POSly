@@ -4,7 +4,7 @@
     <%= link_to "← Back to Dashboard", products_path %>
     <div class="d-flex justify-content-start align-items-center gap-3">
       <h1 class="fw-bold mt-2"><%= @product.name %></h1>
-      <%= link_to edit_product_path(@product) do %>
+      <%= link_to edit_product_path(@product), title: "Edit" do %>
       <i class="fa-solid fa-pencil text-primary"></i>
       <% end %>
       <%= link_to product_path( @product),

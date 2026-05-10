@@ -18,5 +18,7 @@ Rails.application.routes.draw do
       post :update_stock # เพิ่มเส้นทาง /products/:id/update_stock
     end
   end
+
+  resources :stock_logs, only: [ :create ] # เน้นไปที่การสร้าง Log จากหน้า Product
   root "products#index"
 end
