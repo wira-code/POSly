@@ -30,6 +30,7 @@ gem "solid_cable"
 
 # Global
 gem "simple_form"
+gem "devise"
 
 
 # Reduces boot times through caching; required in config/boot.rb

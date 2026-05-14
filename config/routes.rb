@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "dashboards/index"
   # root "page#home"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -20,5 +21,5 @@ Rails.application.routes.draw do
   end
 
   resources :stock_logs, only: [ :create ] # เน้นไปที่การสร้าง Log จากหน้า Product
-  root "products#index"
+  root "dashboards#index" # ให้หน้า Dashboard เป็นหน้าแรกของแอป
 end

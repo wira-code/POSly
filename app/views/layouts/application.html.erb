@@ -24,7 +24,86 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <style>
+      .main-wrapper {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+      }
+
+      .sidebar {
+        width: 280px;/* เพิ่มความกว้างจากเดิม (ปกติมักจะอยู่ที่ 250-280px) */
+        min-width: 280px;     /* กันไม่ให้มันหดตัว */
+        background: white;
+        border-right: 1px solid #eee;
+        padding: 20px;
+      }
+
+      .content {
+        flex-grow: 1;         /* ให้กินพื้นที่ที่เหลือ */
+        background-color: #f8f9fa; /* สีพื้นหลังเทาอ่อนช่วยให้ตารางดูไม่แบน */
+        padding: 40px;/* เพิ่ม Padding รอบๆ เพื่อให้เนื้อหาดูแคบลงและมีช่องไฟ */
+}
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+        color: #333;
+        text-decoration: none;
+        transition: 0.3s;
+        border: 1px solid transparent;
+      }
+
+      .nav-item i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+      }
+
+      .nav-item:hover {
+        background: #f0f0f0;
+      }
+
+      .nav-item.active {
+        background: #0d6efd;
+        color: white;
+      }
+    </style>
+
   <body>
-    <%= yield %>
+    <div class="main-wrapper d-flex">
+      <!-- Sidebar ด้านข้างตามรูป ff2710c3-7e84-4206-963d-bcb875b27cd3.jpeg -->
+      <div class="sidebar">
+        <div class="brand mb-4 d-flex align-items-center">
+          <div class="logo-box bg-primary text-white p-2 rounded me-2">PL</div>
+          <div><strong>POSly</strong><br><small class="text-muted">Inventory</small></div>
+        </div>
+
+        <nav>
+          <%= link_to root_path, class: "nav-item #{'active' if current_page?(root_path)}" do %>
+          <!--  <i class="fa-solid fa-grid-2"></i> -->
+            <i class="fa-regular fa-calendar"></i> Dashboard
+          <% end %>
+
+          <%= link_to products_path, class: "nav-item #{'active' if current_page?(products_path)}" do %>
+            <i class="fa-solid fa-box-archive"></i> รายการสินค้า
+          <% end %>
+
+          <a href="#" class="nav-item"><i class="fa-solid fa-arrow-right-to-bracket"></i> รับเข้า</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-arrow-right-from-bracket"></i> จ่ายออก</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-location-dot"></i> ตำแหน่งจัดเก็บ</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> รายงานสต็อก</a>
+        </nav>
+      </div>
+
+      <!-- ส่วนแสดงเนื้อหาหลัก -->
+      <div class="content flex-grow-1 p-4" style="background-color: #f8f9fa;">
+        <%= yield %>
+      </div>
+    </div>
   </body>
 </html>

@@ -43,8 +43,11 @@ class ProductsController < ApplicationController
   def create
     @product = Product.new(product_params)
     if @product.save
-      # เมื่อสร้างสินค้าสำเร็จ ให้สร้าง StockLog เริ่มต้นด้วย
-      @product.stock_logs.create(change_amount: @product.quantity, log_type: "Initial Stock", note: "สร้างสินค้าใหม่")
+      # ✅ ต้องมีบรรทัดนี้ เพื่อสร้างประวัติเริ่มต้น
+      # @product.stock_logs.create(
+      # change_amount: @product.quantity,
+      # log_type: "Initial Stock", # ⚠️ คำนี้ต้องสะกดเหมือนใน Model เป๊ะๆ
+      # note: "สต็อกเริ่มต้น")
       redirect_to products_path, notice: "Product was successfully created."
     else
       render :new, status: :unprocessable_entity
