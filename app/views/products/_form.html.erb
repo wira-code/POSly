@@ -36,8 +36,26 @@
     </div>
 
   <div class="mb-3">
-    <%= f.input :description, as: :text, input_html: { rows: 3 } %>
+    <%= f.input :description, as: :text, input_html: { rows: 2 } %>
   </div>
+<div class="row">
+  <div class="col-md-6">
+    <%= f.association :category,
+                    label: "Category",
+                    prompt: "เลือกหมวดหมู่สินค้า",
+                    input_html: { class: "form-select shadow-sm" },
+                    label_html: { class: "fw-bold" } %>
+  </div>
+
+  <div class="col-md-6">
+    <%= f.input :cost, label: "Cost" do %>
+          <div class="input-group">
+            <span class="input-group-text">฿</span>
+            <%= f.input_field :cost, class: "form-control", step: :any %>
+          </div>
+        <% end %>
+  </div>
+</div>
 
   <div class="mb-4">
     <%= f.input :quantity, label: "Initial Stock" %>

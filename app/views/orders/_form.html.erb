@@ -1,0 +1,107 @@
+
+<%# app/views/orders/_form.html.erb %>
+<%#= simple_form_for(@order) do |f| %>
+<%= simple_form_for(@order, data: { controller: 'nested-form', nested_form_wrapper_selector_value: '.nested-form-wrapper' }) do |f| %>
+  <div class="card-body pt-0 fw-bold">
+    <div class="row">
+      <div class="col-md-6">
+        <%= f.input :customer_name, label: "Customer Name" %>
+      </div>
+      <div class="col-md-6">
+        <%= f.input :customer_phone, label: "Phone No." %>
+      </div>
+
+      <div class="col-md-12">
+        <%= f.input :customer_address, label: "Address", as: :string %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <%= f.input :payment_method,
+                    collection: ["เงินสด", "โอนเงิน", "บัตรเครดิต"],
+                    prompt: "เลือกวิธีชำระเงิน",
+                    input_html: { class: "form-select shadow-sm" } %>
+      </div>
+      <div class="col-md-6">
+        <%= f.input :status,
+                    collection: [["รอดำเนินการ", "pending"], ["สำเร็จ", "completed"]],
+                    include_blank: false,
+                    input_html: { class: "form-select shadow-sm" } %>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-space-around gap-4 mt-1">
+      <h4 class="mt-0">Product List</h4>
+      <button type="button" data-action="nested-form#add" class="btn btn-outline-primary"><i class="bi bi-plus"></i> +
+      </button>
+    </div>
+
+    <%# จุดที่จะให้แถวสินค้ามาโผล่ %>
+    <div id="order-items-container">
+      <%# 1. Template สำหรับแถวใหม่ %>
+      <template data-nested-form-target="template">
+        <%= f.simple_fields_for :order_items, OrderItem.new, child_index: 'NEW_RECORD' do |oi| %>
+          <%= render "order_item_fields", f: oi %>
+        <% end %>
+      </template>
+
+      <%# 2. รายการที่มีอยู่เดิม %>
+      <%= f.simple_fields_for :order_items do |oi| %>
+        <%= render "order_item_fields", f: oi %>
+      <% end %>
+
+      <%# 3. สำคัญมาก: จุดที่แถวใหม่จะถูกแทรก (ต้องมีบรรทัดนี้!) %>
+      <div data-nested-form-target="target"></div>
+
+    </div>
+
+
+
+    <!--<div class="col-6 p-2 bg-light align-items-end">-->
+      <div class="d-flex justify-content-end">
+      <div class="card col-5 py-2 pe-2 bg-light align-content-end">
+      <h5 class="text-end mb-0">Grand-total: <span id="grand-total">0.00</span> บาท</h5>
+      </div>
+    </div>
+
+    <div class="row g-2 mt-4">
+      <div class="col-6">
+      <%= f.button :submit, "ยืนยันการขาย (ตัดสต็อก)", class: "btn btn-success btn-lg w-100" %>
+      </div>
+      <div class="col-6">
+        <%# ปุ่ม Cancel ขยายเต็มความกว้างให้เท่ากัน %>
+        <%= link_to "Cancel", products_path, class: "btn btn-outline-secondary btn-lg w-100" %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+
+<script>
+document.addEventListener('change', function(e) {
+  // 1. เมื่อเลือกสินค้า -> ดึงราคามาใส่ช่อง Price
+ if (e.target.classList.contains('product-select')) {
+      const price = e.target.options[e.target.selectedIndex].dataset.price;
+      const row = e.target.closest('.nested-form-wrapper');
+      row.querySelector('.price-input').value = price;
+      calculateGrandTotal();
+    }
+
+  // 2. เมื่อมีการแก้ราคา หรือ จำนวน -> (Optional) คำนวณราคารวมโชว์
+  if (e.target.classList.contains('quantity-input') || e.target.classList.contains('price-input')) {
+      calculateGrandTotal();
+    }
+});
+
+function calculateGrandTotal() {
+    let total = 0;
+    document.querySelectorAll('.nested-form-wrapper').forEach(row => {
+      if (row.style.display !== 'none') {
+        const p = parseFloat(row.querySelector('.price-input').value) || 0;
+        const q = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        total += p * q;
+      }
+    });
+    document.getElementById('grand-total').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2});
+  }
+</script>

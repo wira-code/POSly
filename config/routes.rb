@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  get "orders/index"
+  get "orders/show"
+  get "orders/new"
   get "dashboards/index"
   # root "page#home"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
@@ -21,5 +24,9 @@ Rails.application.routes.draw do
   end
 
   resources :stock_logs, only: [ :create ] # เน้นไปที่การสร้าง Log จากหน้า Product
+
+  # Routes สำหรับระบบ POS (Orders)
+  resources :orders, only: [ :index, :show, :new, :create ]
+
   root "dashboards#index" # ให้หน้า Dashboard เป็นหน้าแรกของแอป
 end

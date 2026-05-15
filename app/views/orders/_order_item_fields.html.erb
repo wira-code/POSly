@@ -1,0 +1,22 @@
+<div class="nested-form-wrapper" data-new-record="<%= f.object.new_record? %>">
+  <div class="d-flex justify-content-between align-items-end gap-3">
+    <div class="col-md-5">
+      <%= f.association :product,
+            collection: Product.all.map { |p| [p.name, p.id, { 'data-price': p.price }] },
+            label: "เลือกสินค้า",
+            input_html: { class: "product-select form-select" } %>
+    </div>
+    <div class="col-md-3">
+      <%= f.input :unit_price, label: "ราคา/หน่วย", input_html: { class: "price-input" } %>
+    </div>
+    <div class="col-md-2">
+      <%= f.input :quantity, label: "จำนวน", input_html: { class: "quantity-input", min: 1 } %>
+    </div>
+    <div class="col-md-2 pb-3 text-center">
+      <button type="button" data-action="nested-form#remove" class="btn btn-outline-danger">
+        <i class="bi bi-trash"></i> -
+      </button>
+      <%= f.hidden_field :_destroy %>
+    </div>
+  </div>
+</div>

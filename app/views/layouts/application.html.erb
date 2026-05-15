@@ -94,9 +94,16 @@
           <% end %>
 
           <a href="#" class="nav-item"><i class="fa-solid fa-arrow-right-to-bracket"></i> รับเข้า</a>
-          <a href="#" class="nav-item"><i class="fa-solid fa-arrow-right-from-bracket"></i> จ่ายออก</a>
+
+          <%= link_to orders_path, class: "nav-item #{'active' if current_page?(orders_path)}" do %>
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> ขายหน้าร้าน (Outbound / Sales)
+          <% end %>
+
           <a href="#" class="nav-item"><i class="fa-solid fa-location-dot"></i> ตำแหน่งจัดเก็บ</a>
-          <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> รายงานสต็อก</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> รายงานยอดขายและกำไร (Sales Report)</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> ประวัติการขาย (Order History)</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-arrow-right-to-bracket"></i> Daily Report</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-arrow-right-to-bracket"></i> Categories</a>
         </nav>
       </div>
 

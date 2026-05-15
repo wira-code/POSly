@@ -1,0 +1,55 @@
+<div class="receipt-container p-4 bg-white shadow-sm" id="printable-area">
+  <div class="text-center mb-4">
+    <h2>ใบเสร็จรับเงิน / Receipt</h2>
+    <p>เลขที่บิล: #<%= @order.id %> | วันที่: <%= @order.created_at.strftime("%d/%m/%Y") %></p>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-6">
+      <strong>ข้อมูลลูกค้า:</strong><br>
+      คุณ <%= @order.customer_name %><br>
+      โทร: <%= @order.customer_phone %><br>
+      ที่อยู่: <%= @order.customer_address %>
+    </div>
+    <div class="col-6 text-end">
+      <strong>ผู้ขาย:</strong> <%= current_user&.name || "พนักงาน" %>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>รายการ</th>
+        <th class="text-end">ราคา/หน่วย</th>
+        <th class="text-center">จำนวน</th>
+        <th class="text-end">ยอดรวม</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @order.order_items.each do |item| %>
+        <tr>
+          <td><%= item.product.name %></td>
+          <td class="text-end"><%= number_to_currency(item.unit_price) %></td>
+          <td class="text-center"><%= item.quantity %></td>
+          <td class="text-end"><%= number_to_currency(item.total_price) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <h4 class="text-end">รวมทั้งสิ้น: <%= number_to_currency(@order.total_price) %></h4>
+</div>
+
+<div class="mt-4 text-center no-print">
+  <button onclick="window.print()" class="btn btn-primary btn-lg">
+    <i class="bi bi-printer"></i> พิมพ์ใบเสร็จ
+  </button>
+</div>
+
+<style>
+@media print {
+  .no-print, .navbar, .btn, footer { display: none !important; }
+  body { background-color: white !important; }
+  .receipt-container { box-shadow: none !important; border: none !important; }
+}
+</style>

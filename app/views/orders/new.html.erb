@@ -1,15 +1,15 @@
-<%# app/views/products/new.html.erb %>
+<%# app/views/orders/new.html.erb %>
 <div class="container mt-2">
   <div class="row justify-content-center">
     <div class="col-md-8">
       <div class="card shadow">
         <div class="card-header bg-primary text-white">
-          <h2 class="mb-0">Add New Product</h2>
+          <h2 class="mb-0">New order (จ่ายออก)</h2>
         </div>
         <div class="card-body p-4">
 
           <%# วิธีเรียกใช้ Partial Form %>
-          <%= render "form" %>
+         <%= render "form", order: @order %>
 
         </div>
       </div>

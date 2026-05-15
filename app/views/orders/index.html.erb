@@ -2,7 +2,7 @@
 <div class="main-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="fw-bold text-primary">POSly: Inventory Dashboard</h1>
-    <%= link_to "+ New Product", new_product_path, class: "btn btn-success btn-lg shadow-sm" %>
+    <%= link_to "+ New Order", new_order_path, class: "btn btn-success btn-lg shadow-sm" %>
   </div>
 
   <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
@@ -29,40 +29,29 @@
     <table class="table table-hover table-bordered align-middle">
       <thead class="table-light">
         <tr class="text-center">
-          <th>SKU</th>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Category</th>
-          <th>Cost</th>
-          <th>Price</th>
-          <th>Current Stock</th> </tr>
+          <th style="width: 15%;">Order No.</th>
+          <th style="width: 15%;">Date</th>
+          <th style="width: 30%;">Customer Name</th>
+          <th style="width: 15%;">Total Price</th>
+          <th style="width: 15%;">Payment Method</th>
+          <th style="width: 10%;">Status</th>
+        </tr>
       </thead>
       <tbody>
-        <% @products.each do |product| %>
-          <tr class="clickable-row" data-href="<%= product_path(product) %>" style="cursor: pointer;">
-            <td class="text-center fw-medium"><%= product.sku %></td>
-            <td class="text-start"><%= product.name %></td>
-            <td class="text-start text-muted"><%= product.description %></td>
-            <td class="text-start text-muted"><%= product.category&.name %></td>
-            <td class="text-end text-warning fw-bold">
-              <%= number_to_currency(product.cost, unit: "฿") %>
-            </td>
-            <td class="text-end text-primary fw-bold">
-              <%= number_to_currency(product.price, unit: "฿") %>
-            </td>
-            <td class="text-center">
-              <span class="badge <%= product.quantity < 10 ? 'bg-danger' : 'bg-success' %>">
-                <%= product.quantity %>
-              </span>
-            </td>
+        <% @orders.each do |product| %>
+          <tr class="clickable-row" data-href="<%= order_path(order) %>" style="cursor: pointer;">
+            <td class="text-center fw-medium"><%= order.payment_method %></td>
+            <td class="text-start"><%= order.status %></td>
+            <td class="text-start text-muted"><%= order.status %></td>
+            <td class="text-start text-muted"><%= order.tatal_price %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
-      <% if @products.none? %>
+      <% if @orders.none? %>
         <div class="text-center py-5 text-muted">
           <i class="fa-solid fa-box-open fa-3x mb-3"></i>
-          <p>ไม่พบข้อมูลสินค้าที่ค้นหา</p>
+          <p>ไม่พบข้อมูลorderที่ค้นหา</p>
         </div>
       <% end %>
   </div>
