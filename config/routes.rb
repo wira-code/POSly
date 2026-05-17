@@ -26,7 +26,7 @@ Rails.application.routes.draw do
   resources :stock_logs, only: [ :create ] # เน้นไปที่การสร้าง Log จากหน้า Product
 
   # Routes สำหรับระบบ POS (Orders)
-  resources :orders, only: [ :index, :show, :new, :create ]
+  resources :orders, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
 
   root "dashboards#index" # ให้หน้า Dashboard เป็นหน้าแรกของแอป
 end

@@ -3,20 +3,31 @@
     <div class="col-md-5">
       <%= f.association :product,
             collection: Product.all.map { |p| [p.name, p.id, { 'data-price': p.price }] },
-            label: "เลือกสินค้า",
+            label: false,
             input_html: { class: "product-select form-select" } %>
     </div>
     <div class="col-md-3">
-      <%= f.input :unit_price, label: "ราคา/หน่วย", input_html: { class: "price-input" } %>
+      <%= f.input :unit_price,
+        as: :string,
+        label: false,
+        input_html: {
+          class: "price-input form-control",
+          # 👈 ดึงค่าที่มีอยู่ใน database มาแสดง และแปลงเป็นทศนิยม 2 ตำแหน่งอัตโนมัติ
+          value: f.object.unit_price.present? ? number_with_precision(f.object.unit_price, precision: 2) : ""
+        } %>
     </div>
     <div class="col-md-2">
-      <%= f.input :quantity, label: "จำนวน", input_html: { class: "quantity-input", min: 1 } %>
+      <%= f.input :quantity, label: false, input_html: { class: "quantity-input", min: 1 } %>
     </div>
     <div class="col-md-2 pb-3 text-center">
       <button type="button" data-action="nested-form#remove" class="btn btn-outline-danger">
         <i class="bi bi-trash"></i> -
       </button>
-      <%= f.hidden_field :_destroy %>
+
+      <%# 🌟 สิ่งที่ต้องมีคู่กันด้านล่างสุดของไฟล์ย่อย 🌟 %>
+      <%= f.hidden_field :id %>       <%# 👈 เพิ่มบรรทัดนี้เข้าไปเพื่อให้รู้ว่าเป็นของเก่าตัวไหน %>
+      <%= f.hidden_field :_destroy %> <%# 👈 มีอยู่เดิมแล้ว %>
+
     </div>
   </div>
 </div>

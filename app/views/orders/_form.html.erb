@@ -1,7 +1,10 @@
 
 <%# app/views/orders/_form.html.erb %>
 <%#= simple_form_for(@order) do |f| %>
-<%= simple_form_for(@order, data: { controller: 'nested-form', nested_form_wrapper_selector_value: '.nested-form-wrapper' }) do |f| %>
+<%= simple_form_for(@order, data: { controller: 'nested-form', nested_form_wrapper_selector_value: '.nested-form-wrapper',
+  # 👈 สั่งให้รันฟังก์ชันคำนวณราคารวมทันทีหลังจากที่ระบบ nested-form ทำการเพิ่มหรือลบแถวเสร็จแล้ว
+  action: "nested-form#after-add->window#calculateGrandTotal nested-form#after-remove->window#calculateGrandTotal"
+}) do |f| %>
   <div class="card-body pt-0 fw-bold">
     <div class="row">
       <div class="col-md-6">
@@ -38,6 +41,13 @@
 
     <%# จุดที่จะให้แถวสินค้ามาโผล่ %>
     <div id="order-items-container">
+      <%# 👈 เพิ่มบล็อกหัวตารางถาวรไว้ตรงนี้ แถวใหม่ที่เกิดมาจะได้ไม่มีหัวซ้ำ %>
+      <div class="row fw-bold text-muted mb-2 px-2 d-none d-md-flex">
+        <div class="col-md-5">เลือกสินค้า</div>
+        <div class="col-md-3">ราคา/หน่วย</div>
+        <div class="col-md-2">จำนวน</div>
+        <div class="col-md-2 text-center">จัดการ</div>
+      </div>
       <%# 1. Template สำหรับแถวใหม่ %>
       <template data-nested-form-target="template">
         <%= f.simple_fields_for :order_items, OrderItem.new, child_index: 'NEW_RECORD' do |oi| %>
@@ -70,7 +80,7 @@
       </div>
       <div class="col-6">
         <%# ปุ่ม Cancel ขยายเต็มความกว้างให้เท่ากัน %>
-        <%= link_to "Cancel", products_path, class: "btn btn-outline-secondary btn-lg w-100" %>
+        <%= link_to "Cancel", orders_path, class: "btn btn-outline-secondary btn-lg w-100" %>
       </div>
     </div>
   </div>
@@ -93,6 +103,18 @@ document.addEventListener('change', function(e) {
     }
 });
 
+  window.calculateGrandTotal = function() {
+    let total = 0;
+    document.querySelectorAll('.nested-form-wrapper').forEach(row => {
+      if (row.style.display !== 'none') {
+        const p = parseFloat(row.querySelector('.price-input').value.replace(/,/g, '')) || 0;
+        const q = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        total += p * q;
+      }
+    });
+    document.getElementById('grand-total').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2});
+  }
+/*
 function calculateGrandTotal() {
     let total = 0;
     document.querySelectorAll('.nested-form-wrapper').forEach(row => {
@@ -104,4 +126,19 @@ function calculateGrandTotal() {
     });
     document.getElementById('grand-total').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2});
   }
+  */
+ // สั่งให้คำนวณราคารวมทันทีเมื่อหน้าจอ HTML โหลดเสร็จสิ้น (สำหรับกรณีโหลดหน้า Edit)
+document.addEventListener("DOMContentLoaded", function() {
+  if (typeof window.calculateGrandTotal === "function") {
+    window.calculateGrandTotal();
+  }
+});
+
+// เพิ่มเติม: สำหรับระบบ Rails ที่ใช้ Turbo / Turbolinks
+document.addEventListener("turbo:load", function() {
+  if (typeof window.calculateGrandTotal === "function") {
+    window.calculateGrandTotal();
+  }
+});
+
 </script>

@@ -1,7 +1,7 @@
 <div class="receipt-container p-4 bg-white shadow-sm" id="printable-area">
   <div class="text-center mb-4">
     <h2>ใบเสร็จรับเงิน / Receipt</h2>
-    <p>เลขที่บิล: #<%= @order.id %> | วันที่: <%= @order.created_at.strftime("%d/%m/%Y") %></p>
+    <p>เลขที่บิล: #<%= @order.order_number %> | วันที่: <%= @order.created_at.strftime("%d/%m/%Y") %></p>
   </div>
 
   <div class="row mb-4">
@@ -11,9 +11,11 @@
       โทร: <%= @order.customer_phone %><br>
       ที่อยู่: <%= @order.customer_address %>
     </div>
+    <!--
     <div class="col-6 text-end">
-      <strong>ผู้ขาย:</strong> <%= current_user&.name || "พนักงาน" %>
+     <strong>ผู้ขาย:</strong> <%#= current_user&.name || "พนักงาน" %>
     </div>
+     -->
   </div>
 
   <table class="table">
@@ -29,21 +31,28 @@
       <% @order.order_items.each do |item| %>
         <tr>
           <td><%= item.product.name %></td>
-          <td class="text-end"><%= number_to_currency(item.unit_price) %></td>
+          <td class="text-end"><%= number_to_currency(item.unit_price, unit: "B", precision: 2) %></td>
           <td class="text-center"><%= item.quantity %></td>
-          <td class="text-end"><%= number_to_currency(item.total_price) %></td>
+          <td class="text-end"><%= number_to_currency(item.unit_price * item.quantity, unit: "€", precision: 2) %></td>
         </tr>
       <% end %>
     </tbody>
   </table>
 
-  <h4 class="text-end">รวมทั้งสิ้น: <%= number_to_currency(@order.total_price) %></h4>
+    <div class="text-end fs-4 fw-bold">
+    รวมทั้งสิ้น:
+    <%= number_to_currency(@order.order_items.sum { |item| item.unit_price * item.quantity }, unit: "€", precision: 2) %>
+  </div>
+
+ <!-- <h4 class="text-end">รวมทั้งสิ้น: <%= number_to_currency(@order.total_price) %></h4> -->
 </div>
 
 <div class="mt-4 text-center no-print">
+  <%= link_to "Back", orders_path, class: "btn btn-lg btn-secondary " %>
   <button onclick="window.print()" class="btn btn-primary btn-lg">
-    <i class="bi bi-printer"></i> พิมพ์ใบเสร็จ
+    <i class="bi bi-printer"></i> Print
   </button>
+  <%= link_to "Edit", edit_order_path(@order), class: "btn btn-lg btn-warning " %>
 </div>
 
 <style>

@@ -1,5 +1,6 @@
 class Product < ApplicationRecord
-  has_many :stock_logs, dependent: :destroy # สินค้า 1 ชิ้น มีประวัติได้หลายรายการ
+  has_many :stock_logs, dependent: :destroy # สินค้า 1 ชิ้น
+  has_many :order_itemsมีประวัติได้หลายรายการ
   belongs_to :category
   has_one_attached :image
   validates :name, presence: true
