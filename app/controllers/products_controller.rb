@@ -11,6 +11,11 @@ class ProductsController < ApplicationController
       @products = Product.all
     end
 
+  # 2. เพิ่มจุดนี้: กรองตามหมวดหมู่สินค้า (Category Filter)
+  if params[:category_id].present?
+    @products = @products.where(category_id: params[:category_id])
+  end
+
     # ตัวอย่างการ Filter ตามจำนวนสินค้า (Low Stock)
     if params[:filter] == "low_stock"
       @products = @products.where("quantity <= 5")

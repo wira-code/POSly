@@ -1,0 +1,25 @@
+
+<%= simple_form_for(@category) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs fw-bold">
+    <div class="mb-3">
+      <%= f.input :name, label: "Category Name", placeholder: "ex. Cloths and fashion" %>
+    </div>
+
+    <div class="mb-3">
+      <%= f.input :description, label: "Description", as: :text, input_html: { rows: 3 } %>
+    </div>
+  </div>
+
+  <div class="row g-2 mt-4">
+    <div class="col-6">
+      <%# ปุ่ม Save/Create ขยายเต็มความกว้างของคอลัมน์ %>
+      <%= f.button :submit, class: "btn btn-success btn-lg w-100" %>
+    </div>
+    <div class="col-6">
+      <%# ปุ่ม Cancel ขยายเต็มความกว้างให้เท่ากัน %>
+      <%= link_to "Cancel", categories_path, class: "btn btn-outline-secondary btn-lg w-100" %>
+    </div>
+  </div>
+<% end %>

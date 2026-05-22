@@ -8,7 +8,7 @@
     </div>
     <div class="col-md-3">
       <%= f.input :unit_price,
-        as: :string,
+        as: :numeric,
         label: false,
         input_html: {
           class: "price-input form-control",
@@ -20,9 +20,10 @@
       <%= f.input :quantity, label: false, input_html: { class: "quantity-input", min: 1 } %>
     </div>
     <div class="col-md-2 pb-3 text-center">
-      <button type="button" data-action="nested-form#remove" class="btn btn-outline-danger">
-        <i class="bi bi-trash"></i> -
+      <button type="button" data-action="nested-form#remove" class="btn btn-outline-danger"><i class="bi bi-trash"></i> -
+      <%#= link_to_remove_association "-", f, class: "btn btn-danger" %1> %>
       </button>
+
 
       <%# 🌟 สิ่งที่ต้องมีคู่กันด้านล่างสุดของไฟล์ย่อย 🌟 %>
       <%= f.hidden_field :id %>       <%# 👈 เพิ่มบรรทัดนี้เข้าไปเพื่อให้รู้ว่าเป็นของเก่าตัวไหน %>

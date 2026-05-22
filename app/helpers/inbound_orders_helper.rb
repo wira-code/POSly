@@ -1,0 +1,2 @@
+module InboundOrdersHelper
+end

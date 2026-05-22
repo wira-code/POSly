@@ -65,12 +65,14 @@
 
     </div>
 
-
+<%#เพิ่มช่องนี้ไว้ในฟอร์มเพื่อส่งค่าราคารวมทั้งหมดกลับไปบันทึกที่ฐานข้อมูล %>
+<%#= f.hidden_field :total_price, id: "order-total-price-hidden" %>
 
     <!--<div class="col-6 p-2 bg-light align-items-end">-->
-      <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-end">
       <div class="card col-5 py-2 pe-2 bg-light align-content-end">
-      <h5 class="text-end mb-0">Grand-total: <span id="grand-total">0.00</span> บาท</h5>
+      <h5 class="text-end mb-0">Grand-total: <span id="grand-total">0.00</span></h5>
+
       </div>
     </div>
 
@@ -88,57 +90,77 @@
 
 
 <script>
-document.addEventListener('change', function(e) {
-  // 1. เมื่อเลือกสินค้า -> ดึงราคามาใส่ช่อง Price
- if (e.target.classList.contains('product-select')) {
-      const price = e.target.options[e.target.selectedIndex].dataset.price;
-      const row = e.target.closest('.nested-form-wrapper');
-      row.querySelector('.price-input').value = price;
-      calculateGrandTotal();
-    }
-
-  // 2. เมื่อมีการแก้ราคา หรือ จำนวน -> (Optional) คำนวณราคารวมโชว์
-  if (e.target.classList.contains('quantity-input') || e.target.classList.contains('price-input')) {
-      calculateGrandTotal();
-    }
-});
+document.addEventListener('turbo:load', function() {
 
   window.calculateGrandTotal = function() {
     let total = 0;
-    document.querySelectorAll('.nested-form-wrapper').forEach(row => {
-      if (row.style.display !== 'none') {
-        const p = parseFloat(row.querySelector('.price-input').value.replace(/,/g, '')) || 0;
-        const q = parseFloat(row.querySelector('.quantity-input').value) || 0;
-        total += p * q;
+
+    // 1. ดึงข้อมูลจากทุกช่องภายใต้แถว wrapper (รองรับทั้งคู่ เผื่อสลับคลาส)
+    document.querySelectorAll('.nested-form-wrapper, .nested-fields').forEach(row => {
+      // ตรวจสอบว่าแถวนั้นไม่ได้ถูกกดลบทิ้ง
+      if (row.style.display !== 'none' && !row.classList.contains('marked-for-destruction')) {
+
+        const priceElement = row.querySelector('.price-input');
+        const qtyElement = row.querySelector('.quantity-input');
+
+        if (priceElement && qtyElement) {
+          // ล้างเครื่องหมายจุลภาค (,) และอักขระแปลกปลอม
+          let priceText = priceElement.value ? priceElement.value.toString().replace(/,/g, '') : '0';
+          let qtyText = qtyElement.value ? qtyElement.value.toString().replace(/,/g, '') : '0';
+
+          const p = parseFloat(priceText) || 0;
+          const q = parseFloat(qtyText) || 0;
+
+          total += p * q;
+        }
       }
     });
-    document.getElementById('grand-total').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2});
-  }
-/*
-function calculateGrandTotal() {
-    let total = 0;
-    document.querySelectorAll('.nested-form-wrapper').forEach(row => {
-      if (row.style.display !== 'none') {
-        const p = parseFloat(row.querySelector('.price-input').value) || 0;
-        const q = parseFloat(row.querySelector('.quantity-input').value) || 0;
-        total += p * q;
+
+    // 2. อัปเดตตัวเลขลงบนหน้าจอ
+    const grandTotalElement = document.getElementById('grand-total') || document.querySelector('.grand-total-display');
+    if (grandTotalElement) {
+      const formattedTotal = total.toLocaleString('th-TH', { minimumFractionDigits: 2 }) + " บาท";
+
+      if (grandTotalElement.tagName === 'INPUT') {
+        grandTotalElement.value = total;
+      } else {
+        grandTotalElement.innerText = formattedTotal;
+      }
+    }
+
+    // 🌟 3. ย้ายมาจุดนี้: ส่งยอดเงินดิบเข้า Hidden field เพื่อยิงไปหลังบ้าน 🌟
+    const hiddenTotalField = document.getElementById('order-total-price-hidden');
+    if (hiddenTotalField) {
+      hiddenTotalField.value = total;
+    }
+  };
+
+  // 4. แนบ Event Listener ดักจับเหตุการณ์
+  const form = document.querySelector('form');
+  if (form) {
+    // พิมพ์หรือกดลูกศรเพิ่มลดจำนวน/ราคา -> คำนวณทันที
+    form.addEventListener('input', function(e) {
+      if (e.target.classList.contains('quantity-input') || e.target.classList.contains('price-input')) {
+        window.calculateGrandTotal();
       }
     });
-    document.getElementById('grand-total').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2});
-  }
-  */
- // สั่งให้คำนวณราคารวมทันทีเมื่อหน้าจอ HTML โหลดเสร็จสิ้น (สำหรับกรณีโหลดหน้า Edit)
-document.addEventListener("DOMContentLoaded", function() {
-  if (typeof window.calculateGrandTotal === "function") {
-    window.calculateGrandTotal();
-  }
-});
 
-// เพิ่มเติม: สำหรับระบบ Rails ที่ใช้ Turbo / Turbolinks
-document.addEventListener("turbo:load", function() {
-  if (typeof window.calculateGrandTotal === "function") {
-    window.calculateGrandTotal();
-  }
-});
+    // เปลี่ยนสินค้าใน Dropdown
+    form.addEventListener('change', function(e) {
+      if (e.target.classList.contains('product-select')) {
+        const selectedOption = e.target.options[e.target.selectedIndex];
+        const price = selectedOption.dataset.price || 0;
+        const row = e.target.closest('.nested-form-wrapper, .nested-fields');
 
+        if (row && row.querySelector('.price-input')) {
+          row.querySelector('.price-input').value = price;
+          window.calculateGrandTotal();
+        }
+      }
+    });
+  }
+
+  // สั่งรันคำนวณทันทีเมื่อเปิดหน้าเว็บ
+  window.calculateGrandTotal();
+});
 </script>

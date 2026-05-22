@@ -1,4 +1,14 @@
 Rails.application.routes.draw do
+  get "inbound_orders/index"
+  get "inbound_orders/show"
+  get "inbound_orders/new"
+  get "inbound_orders/create"
+  get "categories/index"
+  get "categories/new"
+  get "categories/create"
+  get "categories/edit"
+  get "categories/update"
+  get "categories/destroy"
   get "orders/index"
   get "orders/show"
   get "orders/new"
@@ -27,6 +37,10 @@ Rails.application.routes.draw do
 
   # Routes สำหรับระบบ POS (Orders)
   resources :orders, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+
+  resources :categories, except: [ :show ] # ไม่เอาหน้า show เพราะจัดการจบในหน้า index ได้เลย
+
+  resources :inbound_orders, only: [ :index, :show, :new, :create ]
 
   root "dashboards#index" # ให้หน้า Dashboard เป็นหน้าแรกของแอป
 end

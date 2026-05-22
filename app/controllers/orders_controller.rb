@@ -88,6 +88,7 @@ class OrdersController < ApplicationController
   params.require(:order).permit(
     :payment_method,
     :status,
+    :total_price,
     :customer_name,
     :customer_phone,
     :customer_address,

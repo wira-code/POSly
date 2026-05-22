@@ -1,26 +1,42 @@
 
 <div class="main-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="fw-bold text-primary">POSly: Inventory Dashboard</h1>
+    <h1 class="fw-bold text-primary">Inventory Dashboard</h1>
     <%= link_to "+ New Product", new_product_path, class: "btn btn-success btn-lg shadow-sm" %>
   </div>
 
   <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
-  <%= form_with url: products_path, method: :get, local: true, class: "search-form" do |f| %>
-    <%= f.text_field :search,
-        value: params[:search],
-        placeholder: "พิมพ์ชื่อสินค้าหรือ SKU...",
-        style: "padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;"
-    %>
-    <%= f.submit "Search",
-        style: "padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;"
-    %>
+    <%= form_with url: products_path, method: :get, local: true, class: "search-form" do |f| %>
+      <%= f.text_field :search,
+          value: params[:search],
+          placeholder: "พิมพ์ชื่อสินค้าหรือ SKU...",
+          style: "padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;"
+      %>
+      <%= f.submit "Search",
+          style: "padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;"
+      %>
 
-    <% if params[:search].present? %>
-      <%= link_to "Clear", products_path, style: "margin-left: 10px; color: #666; text-decoration: none;" %>
+      <% if params[:search].present? %>
+        <%= link_to "Clear", products_path, style: "margin-left: 10px; color: #666; text-decoration: none;" %>
+      <% end %>
     <% end %>
-  <% end %>
-</div>
+    <div class="mb-0">
+<!-- 1. ปุ่มทั้งหมด (ไม่ส่งพารามิเตอร์ใดๆ ไป เพื่อดึงกลับมาโชว์ทั้งหมด) -->
+        <%= link_to "ทั้งหมด", products_path,
+                    class: "btn #{params[:category_id].blank? ? 'btn-secondary' : 'btn-outline-secondary'}" %>
+
+<!-- 2. ลูปดึงหมวดหมู่สินค้าที่มีทั้งหมดในระบบมาสร้างเป็นปุ่มทีละปุ่มอัตโนมัติ -->
+        <% Category.all.each do |category| %>
+          <%# เช็คว่าถ้าปัจจุบันกดเลือกหมวดหมู่นี้อยู่ ให้ปุ่มเปลี่ยนเป็นสีเข้มปุ่มทึบ %>
+          <% is_active = params[:category_id] == category.id.to_s %>
+          <%= link_to category.name,
+                      products_path(category_id: category.id),
+                      class: "btn #{is_active ? 'btn-primary' : 'btn-outline-primary'} ms-1" %>
+        <% end %>
+    </div>
+  </div>
+
+
 
 <%# Turbo Frame ครอบตารางสินค้า %>
 <%= turbo_frame_tag "products" do %>

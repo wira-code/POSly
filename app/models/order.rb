@@ -2,6 +2,7 @@ class Order < ApplicationRecord
   has_many :order_items, dependent: :destroy
   has_many :products, through: :order_items
   validates :payment_method, presence: true
+  # validates :total_price, presence: true
   validates :status, presence: true
   validates :customer_name, presence: true
   validates :customer_address, presence: true

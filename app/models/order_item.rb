@@ -1,10 +1,13 @@
 class OrderItem < ApplicationRecord
   belongs_to :order
   belongs_to :product
+  # 🌟 ตรวจเช็คให้ดี: หากคุณมีสองบรรทัดนี้อยู่ ยอดห้ามส่งมาเป็น 0 หรือว่างเด็ดขาด
+  validates :quantity, presence: true, numericality: { greater_than: 0 }
+  validates :unit_price, presence: true
 
   # after_create :reduce_product_stock
 
-  # 🌟 ตรวจสอบตรงนี้: ต้องเปลี่ยนชื่อตัวเรียกหลัง after_save ให้เป็นชื่อเดียวกับเมธอดด้านล่าง
+  # 🌟 ใช้ after_save และ after_destroy ในการควบคุมสต็อก  ต้องเปลี่ยนชื่อตัวเรียกหลัง after_save ให้เป็นชื่อเดียวกับเมธอดด้านล่าง
   after_save :adjust_product_stock
   after_destroy :restore_stock_on_destroy
 
@@ -15,9 +18,10 @@ class OrderItem < ApplicationRecord
     product = self.product
     return unless product
 
-    # 1. คำนวณหาจำนวนที่เปลี่ยนแปลง (เพื่อนำไปบันทึกลง Log)
+    # 1. เช็คว่าเป็นออเดอร์สร้างใหม่ หรือเป็นการเอาบิลเก่ามาแก้ไขจำนวนชิ้น
     if saved_change_to_id?
       # เพิ่มรายการสินค้าชิ้นนี้เข้ามาใหม่ในบิลเดิม -> สต็อกลดลงตามจำนวนชิ้นที่สั่ง
+      # quantity_change = product.quantity - self.quantity
       quantity_change = -self.quantity
       # กรณีเพิ่มสินค้าแถวใหม่เข้ามาในบิล -> หักสต็อกตามจำนวนปกติ
       new_quantity = product.quantity - self.quantity
@@ -25,22 +29,27 @@ class OrderItem < ApplicationRecord
       # กรณีแก้ไขจำนวนสินค้าแถวเดิม -> คำนวณหาส่วนต่างเพื่อเพิ่ม/ลดสต็อกให้ถูกต้อง
       old_qty, new_qty = saved_change_to_quantity || [ quantity, quantity ]
       diff = new_qty - old_qty
-      quantity_change = -diff  # ถ้าสั่งเพิ่มขึ้น ค่าติดลบจะมากขึ้น (เช่น สั่งเพิ่ม 1 ชิ้น สต็อกต้องลบออก 1)
+      quantity_change = -diff # สั่งสินค้าเพิ่ม = สต็อกต้องลดลง (-) / สั่งสินค้าน้อยลง = สต็อกต้องเพิ่มกลับมา (+)(เช่น สั่งเพิ่ม 1 ชิ้น สต็อกต้องลบออก 1)
       new_quantity = product.quantity - diff
     end
 
-    # 2. อัปเดตยอดสต็อกใหม่ลงเซิร์ฟเวอร์ทันที
+    # 2. ทำการบันทึกยอดรวมสินค้าคงคลังสุทธิลงคอลัมน์ quantity ในตาราง products โดยไม่เปิด Validation ซ้ำซ้อน
     product.update_column(:quantity, new_quantity)
 
-    # 🌟 3. เพิ่มคำสั่งสร้าง Log ลงตารางประวัติ (Stock Logs) อัตโนมัติ 🌟
+    # 3. บันทึกประวัติประทับตราเข้าตาราง stock_logs อัตโนมัติ
     # (เปลี่ยนชื่อโมเดลและชื่อคอลัมน์ให้ตรงกับที่ระบบคุณใช้อยู่จริงนะครับ)
     if quantity_change != 0 && defined?(StockLog)
-      StockLog.create!(
+      # 🌟 ดึงหมายเลข ID ออเดอร์มาใช้แทนเพื่อความปลอดภัย ป้องกันปัญหาระบบหาคอลัมน์ order_number ไม่เจอ
+      order_identifier = order.respond_to?(:order_number) ? order.order_number : order.id
+
+      StockLog.create( # ปกติใช้ create!
         product_id: product.id,
         change_amount: quantity_change, # บันทึกยอดความเปลี่ยนแปลง เช่น -1 หรือ +2
-        note: "ปรับปรุงยอดจากบิลหมายเลข: #{order.order_number || order.id} (แก้ไขรายการ)"
+        log_type: quantity_change < 0 ? "Sale" : "Adjustment", # 💡 เติมประเภทให้สมบูรณ์
+        note: "ปรับปรุงยอดจากบิลหมายเลข: ##{order_identifier}(แก้ไขรายการ)"
       )
     end
+    true # 🌟 เพิ่มบรรทัดนี้ปิดท้ายเมธอด เพื่อป้องกันการแอบ Abort
   end
 
   # เมธอดคืนสต็อกเมื่อมีการกดลบรายการสินค้านั้นออกจากหน้าฟอร์ม
@@ -52,14 +61,18 @@ class OrderItem < ApplicationRecord
 
       # 🌟 สร้าง Log บันทึกกรณีพนักงานกดปุ่มลบรายการสินค้านั้นออกจากบิล
       if defined?(StockLog)
-        StockLog.create!(
-         product_id: product.id,
-          change_amount: self.quantity, # 🌟 แก้ไขเป็น :change_amount ตาม schema จริง
+        order_identifier = order.respond_to?(:order_number) ? order.order_number : order.id
+
+        StockLog.create( # ก่อนหน้านี้ใช้ create!
+          product_id: product.id,
+          change_amount: self.quantity, # 🌟 คืนสต็อก ยอดเป็นบวก (+) ตาม schema จริง
           log_type: "Return",   # 🌟 เพิ่ม :log_type ให้สอดคล้องกับ schema
-          note: "คืนสต็อกเนื่องจากลบรายการออกจากบิล: #{order.order_number || order.id}"
+          note: "คืนสต็อกเนื่องจากลบรายการออกจากบิล: ##{order_identifier}"
+          # {order.order_number || order.id}  แบบเดิมใช้โค้ดนี้"
         )
       end
     end
+    true # 🌟 เพิ่มบรรทัดนี้ปิดท้ายเมธอดเช่นกันครับ
   end
 end
 
