@@ -1,0 +1,165 @@
+
+<%# app/views/inbound_orders/_form.html.erb %>
+<%= simple_form_for(@inbound_order, data: { controller: 'nested-form', nested_form_wrapper_selector_value: '.nested-form-wrapper',
+  # 👈 สั่งให้รันฟังก์ชันคำนวณราคารวมทันทีหลังจากที่ระบบ nested-form ทำการเพิ่มหรือลบแถวเสร็จแล้ว
+  action: "nested-form#after-add->window#calculateGrandTotal nested-form#after-remove->window#calculateGrandTotal"
+}) do |f| %>
+  <div class="card-body pt-0 fw-bold">
+    <div class="row">
+      <div class="col-md-6">
+        <%= f.input :customer_name, label: "Customer Name" %>
+      </div>
+      <div class="col-md-6">
+        <%= f.input :customer_phone, label: "Phone No." %>
+      </div>
+
+      <div class="col-md-12">
+        <%= f.input :customer_address, label: "Address", as: :string %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <%= f.input :payment_method,
+                    collection: ["เงินสด", "โอนเงิน", "บัตรเครดิต"],
+                    prompt: "เลือกวิธีชำระเงิน",
+                    input_html: { class: "form-select shadow-sm" } %>
+      </div>
+      <div class="col-md-6">
+        <%= f.input :status,
+                    collection: [["รอดำเนินการ", "pending"], ["สำเร็จ", "completed"]],
+                    include_blank: false,
+                    input_html: { class: "form-select shadow-sm" } %>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-space-around gap-4 mt-1">
+      <h4 class="mt-0">Product List</h4>
+      <button type="button" data-action="nested-form#add" class="btn btn-outline-primary"><i class="bi bi-plus"></i> +
+      </button>
+    </div>
+
+    <%# จุดที่จะให้แถวสินค้ามาโผล่ %>
+    <div id="order-items-container">
+      <%# 👈 เพิ่มบล็อกหัวตารางถาวรไว้ตรงนี้ แถวใหม่ที่เกิดมาจะได้ไม่มีหัวซ้ำ %>
+      <div class="row fw-bold text-muted mb-2 px-2 d-none d-md-flex">
+        <div class="col-md-5">เลือกสินค้า</div>
+        <div class="col-md-3">ราคา/หน่วย</div>
+        <div class="col-md-2">จำนวน</div>
+        <div class="col-md-2 text-center">จัดการ</div>
+      </div>
+      <%# 1. Template สำหรับแถวใหม่ %>
+      <template data-nested-form-target="template">
+        <%= f.simple_fields_for :order_items, OrderItem.new, child_index: 'NEW_RECORD' do |oi| %>
+          <%= render "order_item_fields", f: oi %>
+        <% end %>
+      </template>
+
+      <%# 2. รายการที่มีอยู่เดิม %>
+      <%= f.simple_fields_for :order_items do |oi| %>
+        <%= render "order_item_fields", f: oi %>
+      <% end %>
+
+      <%# 3. สำคัญมาก: จุดที่แถวใหม่จะถูกแทรก (ต้องมีบรรทัดนี้!) %>
+      <div data-nested-form-target="target"></div>
+
+    </div>
+
+<%#เพิ่มช่องนี้ไว้ในฟอร์มเพื่อส่งค่าราคารวมทั้งหมดกลับไปบันทึกที่ฐานข้อมูล %>
+<%#= f.hidden_field :total_price, id: "order-total-price-hidden" %>
+
+    <!--<div class="col-6 p-2 bg-light align-items-end">-->
+    <div class="d-flex justify-content-end">
+      <div class="card col-5 py-2 pe-2 bg-light align-content-end">
+      <h5 class="text-end mb-0">Grand-total: <span id="grand-total">0.00</span></h5>
+
+      </div>
+    </div>
+
+    <div class="row g-2 mt-4">
+      <div class="col-6">
+      <%= f.button :submit, "ยืนยันการขาย (ตัดสต็อก)", class: "btn btn-success btn-lg w-100" %>
+      </div>
+      <div class="col-6">
+        <%# ปุ่ม Cancel ขยายเต็มความกว้างให้เท่ากัน %>
+        <%= link_to "Cancel", orders_path, class: "btn btn-outline-secondary btn-lg w-100" %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+
+<script>
+document.addEventListener('turbo:load', function() {
+
+  window.calculateGrandTotal = function() {
+    let total = 0;
+
+    // 1. ดึงข้อมูลจากทุกช่องภายใต้แถว wrapper (รองรับทั้งคู่ เผื่อสลับคลาส)
+    document.querySelectorAll('.nested-form-wrapper, .nested-fields').forEach(row => {
+      // ตรวจสอบว่าแถวนั้นไม่ได้ถูกกดลบทิ้ง
+      if (row.style.display !== 'none' && !row.classList.contains('marked-for-destruction')) {
+
+        const priceElement = row.querySelector('.price-input');
+        const qtyElement = row.querySelector('.quantity-input');
+
+        if (priceElement && qtyElement) {
+          // ล้างเครื่องหมายจุลภาค (,) และอักขระแปลกปลอม
+          let priceText = priceElement.value ? priceElement.value.toString().replace(/,/g, '') : '0';
+          let qtyText = qtyElement.value ? qtyElement.value.toString().replace(/,/g, '') : '0';
+
+          const p = parseFloat(priceText) || 0;
+          const q = parseFloat(qtyText) || 0;
+
+          total += p * q;
+        }
+      }
+    });
+
+    // 2. อัปเดตตัวเลขลงบนหน้าจอ
+    const grandTotalElement = document.getElementById('grand-total') || document.querySelector('.grand-total-display');
+    if (grandTotalElement) {
+      const formattedTotal = total.toLocaleString('th-TH', { minimumFractionDigits: 2 }) + " บาท";
+
+      if (grandTotalElement.tagName === 'INPUT') {
+        grandTotalElement.value = total;
+      } else {
+        grandTotalElement.innerText = formattedTotal;
+      }
+    }
+
+    // 🌟 3. ย้ายมาจุดนี้: ส่งยอดเงินดิบเข้า Hidden field เพื่อยิงไปหลังบ้าน 🌟
+    const hiddenTotalField = document.getElementById('order-total-price-hidden');
+    if (hiddenTotalField) {
+      hiddenTotalField.value = total;
+    }
+  };
+
+  // 4. แนบ Event Listener ดักจับเหตุการณ์
+  const form = document.querySelector('form');
+  if (form) {
+    // พิมพ์หรือกดลูกศรเพิ่มลดจำนวน/ราคา -> คำนวณทันที
+    form.addEventListener('input', function(e) {
+      if (e.target.classList.contains('quantity-input') || e.target.classList.contains('price-input')) {
+        window.calculateGrandTotal();
+      }
+    });
+
+    // เปลี่ยนสินค้าใน Dropdown
+    form.addEventListener('change', function(e) {
+      if (e.target.classList.contains('product-select')) {
+        const selectedOption = e.target.options[e.target.selectedIndex];
+        const price = selectedOption.dataset.price || 0;
+        const row = e.target.closest('.nested-form-wrapper, .nested-fields');
+
+        if (row && row.querySelector('.price-input')) {
+          row.querySelector('.price-input').value = price;
+          window.calculateGrandTotal();
+        }
+      }
+    });
+  }
+
+  // สั่งรันคำนวณทันทีเมื่อเปิดหน้าเว็บ
+  window.calculateGrandTotal();
+});
+</script>

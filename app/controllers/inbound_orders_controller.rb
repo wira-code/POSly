@@ -25,6 +25,10 @@ class InboundOrdersController < ApplicationController
   private
 
   def inbound_order_params
-    params.require(:inbound_order).permit(:note, inbound_items_attributes: [ :id, :product_id, :quantity, :unit_cost, :_destroy ])
+  params.require(:inbound_order).permit(
+    :supplier_name, :supplier_phone, :supplier_address,
+    :payment_method, :status, :note,
+    inbound_items_attributes: [ :id, :product_id, :quantity, :unit_cost, :_destroy ]
+    )
   end
 end

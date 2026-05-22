@@ -5,9 +5,11 @@ class InboundOrder < ApplicationRecord
   accepts_nested_attributes_for :inbound_items, allow_destroy: true, reject_if: :all_blank
 
   validates :inbound_number, presence: true, uniqueness: true
+  validates :supplier_name, :payment_method, :status, presence: true
 
   # สร้างเลขที่บิลรับเข้าอัตโนมัติก่อนบันทึก (เช่น INB-20260522-0001)
   before_validation :generate_inbound_number, on: :create
+  before_save :calculate_total_price
 
   private
 
@@ -18,5 +20,10 @@ class InboundOrder < ApplicationRecord
     next_number = last_order ? last_order.inbound_number.split("-").last.to_i + 1 : 1
     self.inbound_number = "INB-#{date_str}-#{format('%04d', next_number)}"
     self.received_at ||= Time.current
+  end
+
+  # คำนวณราคารวมทั้งหมดของบิลนี้จากรายการย่อย
+  def calculate_total_price
+    self.total_price = inbound_items.sum { |item| (item.quantity || 0) * (item.unit_cost || 0) }
   end
 end

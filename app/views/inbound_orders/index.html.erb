@@ -1,2 +1,61 @@
-<h1>InboundOrders#index</h1>
-<p>Find me in app/views/inbound_orders/index.html.erb</p>
+
+<div class="main-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold text-primary">Outbound/Sales</h1>
+    <%= link_to "+ New Inbound Order", new_inbound_order_path, class: "btn btn-success btn-lg shadow-sm" %>
+  </div>
+
+  <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+  <%= form_with url: new_inbound_order_path, method: :get, local: true, class: "search-form" do |f| %>
+    <%= f.text_field :query,
+        value: params[:query],
+        placeholder: "พิมพ์เลขที่ใบเสร็จหรือชื่อผู้ขาย...",
+        style: "padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;"
+    %>
+    <%= f.submit "Search",
+        style: "padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;"
+    %>
+
+    <% if params[:query].present? %>
+      <%= link_to "Clear", inbound_orders_path, style: "margin-left: 10px; color: #666; text-decoration: none;" %>
+    <% end %>
+  <% end %>
+</div>
+
+<%# Turbo Frame ครอบตารางสินค้า %>
+<%= turbo_frame_tag "inbound_orders" do %>
+<div class="table-responsive shadow-sm rounded">
+    <!-- สร้างให้ท้ังแถวสามารถคลิกแล้วลิ้งไปที่หน้าโชว์รายละเอียด -->
+    <table class="table table-hover table-bordered align-middle">
+      <thead class="table-light">
+        <tr class="text-center">
+          <th style="width: 15%;">Inbound No.</th>
+          <th style="width: 15%;">Date</th>
+          <th style="width: 30%;">Supplier Name</th>
+          <th style="width: 15%;">Total Price</th>
+          <th style="width: 15%;">Payment Method</th>
+          <th style="width: 10%;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @inbound_orders.each do |inbound_order| %>
+          <tr class="clickable-row" data-href="<%= inbound_order_path(inbound_order) %>" style="cursor: pointer;">
+            <td class="text-start"><%= order.order_number %></td>
+            <td class="text-start"><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td class="text-start text-muted"><%= order.customer_name %></td>
+            <td class="text-end text-muted"><%= number_to_currency(order.order_items.sum { |item| item.unit_price * item.quantity }, unit: "B", precision: 2, format: "%n %u") %></td>
+            <td class="text-center fw-medium"><%= order.payment_method %></td>
+            <td class="text-center text-muted"><%= order.status %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+      <% if @inbound_orders.none? %>
+        <div class="text-center py-5 text-muted">
+          <i class="fa-solid fa-box-open fa-3x mb-3"></i>
+          <p>ไม่พบข้อมูลorderที่ค้นหา</p>
+        </div>
+      <% end %>
+  </div>
+  <% end %>
+</div>
