@@ -1,8 +1,8 @@
 
 <div class="main-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="fw-bold text-primary">Outbound/Sales</h1>
-    <%= link_to "+ New Inbound Order", new_inbound_order_path, class: "btn btn-success btn-lg shadow-sm" %>
+    <h1 class="fw-bold text-primary">Inbound/Stock In</h1>
+    <%= link_to "+ New Inbound", new_inbound_order_path, class: "btn btn-success btn-lg shadow-sm" %>
   </div>
 
   <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
@@ -40,12 +40,12 @@
       <tbody>
         <% @inbound_orders.each do |inbound_order| %>
           <tr class="clickable-row" data-href="<%= inbound_order_path(inbound_order) %>" style="cursor: pointer;">
-            <td class="text-start"><%= order.order_number %></td>
-            <td class="text-start"><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-            <td class="text-start text-muted"><%= order.customer_name %></td>
-            <td class="text-end text-muted"><%= number_to_currency(order.order_items.sum { |item| item.unit_price * item.quantity }, unit: "B", precision: 2, format: "%n %u") %></td>
-            <td class="text-center fw-medium"><%= order.payment_method %></td>
-            <td class="text-center text-muted"><%= order.status %></td>
+            <td class="text-start"><%= inbound_order.inbound_number %></td>
+            <td class="text-start"><%= inbound_order.received_at.strftime("%d/%m/%Y") %></td>
+            <td class="text-start text-muted"><%= inbound_order.supplier_name %></td>
+            <td class="text-end text-muted"><%= number_to_currency(inbound_order.inbound_items.sum { |item| item.unit_cost * item.quantity }, unit: "B", precision: 2, format: "%n %u") %></td>
+            <td class="text-center fw-medium"><%= inbound_order.payment_method %></td>
+            <td class="text-center text-muted"><%= inbound_order.status %></td>
           </tr>
         <% end %>
       </tbody>

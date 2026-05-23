@@ -7,14 +7,33 @@
   <div class="card-body pt-0 fw-bold">
     <div class="row">
       <div class="col-md-6">
-        <%= f.input :customer_name, label: "Customer Name" %>
+          <label class="form-label text-muted">Invoice No.</label>
+          <%= f.input :inbound_number,
+                      label: false,
+                      required: true,
+                      input_html: { class: "form-control py-2", placeholder: "Invoice No." } %>
       </div>
       <div class="col-md-6">
-        <%= f.input :customer_phone, label: "Phone No." %>
+          <label class="form-label text-muted">Issue Date</label>
+          <%= f.input :received_at,
+                      label: false,
+                      required: false,
+                      as: :string, # บังคับโครงสร้างหลักเป็นสตริงตัวเดียว
+                      input_html: {
+                      type: 'date', # เปลี่ยนเป็นช่องปฏิทินหน้าต่างเดียวแบบคีย์ง่าย (หรือใช้ 'datetime-local' ถ้าอยากให้เลือกเวลาได้ด้วย)
+                      class: "form-control py-2" } %>
+                      <!-- as: :datetime, # หรือใช้ :date ถ้าต้องการแค่วันที่ ไม่ระบุเวลา
+                      input_html: { class: "form-control py-2" } %> -->
+      </div>
+      <div class="col-md-6">
+        <%= f.input :supplier_name, label: "Supplier Name" %>
+      </div>
+      <div class="col-md-6">
+        <%= f.input :supplier_phone, label: "Phone No." %>
       </div>
 
       <div class="col-md-12">
-        <%= f.input :customer_address, label: "Address", as: :string %>
+        <%= f.input :supplier_address, label: "Address", as: :string %>
       </div>
     </div>
     <div class="row">
@@ -41,22 +60,28 @@
     <%# จุดที่จะให้แถวสินค้ามาโผล่ %>
     <div id="order-items-container">
       <%# 👈 เพิ่มบล็อกหัวตารางถาวรไว้ตรงนี้ แถวใหม่ที่เกิดมาจะได้ไม่มีหัวซ้ำ %>
-      <div class="row fw-bold text-muted mb-2 px-2 d-none d-md-flex">
+      <div class="row fw-bold text-muted ps-2 mb-2 d-none d-md-flex">
         <div class="col-md-5">เลือกสินค้า</div>
         <div class="col-md-3">ราคา/หน่วย</div>
         <div class="col-md-2">จำนวน</div>
         <div class="col-md-2 text-center">จัดการ</div>
       </div>
+
       <%# 1. Template สำหรับแถวใหม่ %>
+      <!-- ส่วนดึงแถวกรอกข้อมูลมาแสดง -->
+      <div id="inbound-items-container">
       <template data-nested-form-target="template">
-        <%= f.simple_fields_for :order_items, OrderItem.new, child_index: 'NEW_RECORD' do |oi| %>
-          <%= render "order_item_fields", f: oi %>
+        <%= f.simple_fields_for :inbound_items, InboundItem.new, child_index: 'NEW_RECORD' do |oi| %>
+          <%#= render/order_items "order_item_fields", f: oi %>
+          <%= render "inbound_orders/inbound_item_fields", f: oi %>
         <% end %>
       </template>
+      </div>
 
       <%# 2. รายการที่มีอยู่เดิม %>
-      <%= f.simple_fields_for :order_items do |oi| %>
-        <%= render "order_item_fields", f: oi %>
+      <%= f.simple_fields_for :inbound_items do |oi| %>
+        <%#= render/order_items "order_item_fields", f: oi %>
+        <%= render "inbound_orders/inbound_item_fields", f: oi %>
       <% end %>
 
       <%# 3. สำคัญมาก: จุดที่แถวใหม่จะถูกแทรก (ต้องมีบรรทัดนี้!) %>
@@ -77,11 +102,11 @@
 
     <div class="row g-2 mt-4">
       <div class="col-6">
-      <%= f.button :submit, "ยืนยันการขาย (ตัดสต็อก)", class: "btn btn-success btn-lg w-100" %>
+      <%= f.button :submit, "ยืนยันการซื้อ (เพิ่มสต็อก)", class: "btn btn-success btn-lg w-100" %>
       </div>
       <div class="col-6">
         <%# ปุ่ม Cancel ขยายเต็มความกว้างให้เท่ากัน %>
-        <%= link_to "Cancel", orders_path, class: "btn btn-outline-secondary btn-lg w-100" %>
+        <%= link_to "Cancel", inbound_orders_path, class: "btn btn-outline-secondary btn-lg w-100" %>
       </div>
     </div>
   </div>

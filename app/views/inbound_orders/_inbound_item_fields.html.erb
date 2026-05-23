@@ -1,0 +1,65 @@
+<!--
+<%# app/views/inbound_orders/_inbound_item_fields.html.erb %>
+<tr class="nested-fields">
+  <td>
+    <%# 1. ส่วนเลือกสินค้า %>
+    <%= f.input :product_id,
+                collection: Product.all,
+                label: false,
+                prompt: "เลือกสินค้า",
+                input_html: { class: "form-select fw-semibold" },
+                wrapper: false %>
+  </td>
+  <td>
+    <%# 2. ส่วนราคาทุนต่อหน่วย %>
+    <%= f.input :unit_cost,
+                label: false,
+                wrapper: false,
+                input_html: { class: "form-control text-end", placeholder: "0.00", step: "0.01" } %>
+  </td>
+  <td>
+    <%# 3. ส่วนจำนวนสินค้า %>
+    <%= f.input :quantity,
+                label: false,
+                wrapper: false,
+                input_html: { class: "form-control text-center", placeholder: "0", min: 1 } %>
+  </td>
+  <td class="text-center">
+    <%# 4. ปุ่มลบแถว %>
+    <button type="button" class="btn btn-outline-danger btn-sm px-2 py-0 remove-fields">-</button>
+  </td>
+</tr>
+-->
+
+<div class="nested-form-wrapper" data-new-record="<%= f.object.new_record? %>">
+  <div class="d-flex justify-content-between align-items-end gap-3">
+    <div class="col-md-5">
+      <%= f.association :product,
+            collection: Product.all.map { |p| [p.name, p.id, { 'data-price': p.price }] },
+            label: false,
+            input_html: { class: "product-select form-select" } %>
+    </div>
+    <div class="col-md-3">
+      <%= f.input :unit_cost,
+        as: :numeric,
+        label: false,
+        input_html: {
+          class: "price-input form-control",
+          # 👈 ดึงค่าที่มีอยู่ใน database มาแสดง และแปลงเป็นทศนิยม 2 ตำแหน่งอัตโนมัติ
+          value: f.object.unit_cost.present? ? number_with_precision(f.object.unit_cost, precision: 2) : ""
+        } %>
+    </div>
+    <div class="col-md-2">
+      <%= f.input :quantity, label: false, input_html: { class: "quantity-input", min: 1 } %>
+    </div>
+    <div class="col-md-2 pb-3 text-center">
+      <button type="button" data-action="nested-form#remove" class="btn btn-outline-danger"><i class="bi bi-trash"></i> -
+      <%#= link_to_remove_association "-", f, class: "btn btn-danger" %1> %>
+      </button>
+
+      <%# 🌟 สิ่งที่ต้องมีคู่กันด้านล่างสุดของไฟล์ย่อย 🌟 %>
+      <%= f.hidden_field :id %>       <%# 👈 เพิ่มบรรทัดนี้เข้าไปเพื่อให้รู้ว่าเป็นของเก่าตัวไหน %>
+      <%= f.hidden_field :_destroy %> <%# 👈 มีอยู่เดิมแล้ว %>
+    </div>
+  </div>
+</div>
