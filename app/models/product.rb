@@ -9,7 +9,7 @@ class Product < ApplicationRecord
   validates :category, presence: true
   validates :cost, numericality: { greater_than_or_equal_to: 0 }, presence: true
   validates :price, numericality: { greater_than_or_equal_to: 0 }, presence: true
-  validates :quantity, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, presence: true
+  validates :quantity, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, presence: false
   # 4. (Optional) ตัวอย่างการทำ Scope เพื่อเรียกดูสินค้าที่ใกล้หมด
   scope :low_stock, -> { where("quantity <= 5") }
   before_save { self.sku = sku.upcase if sku.present? }

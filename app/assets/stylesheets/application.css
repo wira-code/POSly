@@ -35,3 +35,55 @@
     text-align: center;
     font-size: 14px;          /* ขนาดตัวอักษรข้อมูล */
   }
+
+  /* โค้ดสำหรับควบคุมหน้าต่างเครื่องพิมพ์โดยเฉพาะ */
+@media print {
+  /* 1. สั่งซ่อนเมนูด้านซ้าย และส่วนหัว/ท้ายเว็บที่ไม่จำเป็น */
+  .sidebar-menu,
+  .navbar, nav,
+  .d-print-none,
+  .btn {
+    display: none !important;
+  }
+
+  /* 2. ดึงกล่องใบเสร็จฝั่งขวา ให้ขยายเนื้อหากว้างเต็มหน้ากระดาษ A4 */
+  .main-content,
+  .receipt-container,
+  div[class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+  }
+
+  /* 3. ลบพื้นหลังสีเทาออก ให้เป็นพื้นขาวประหยัดหมึกพิมพ์ */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* ปรับแต่งสำหรับการพิมพ์ใบเสร็จโดยเฉพาะ */
+@media print, screen {
+
+  /* บังคับให้หน้าต่างใบเสร็จหลักมีความสูงอย่างน้อยที่สุดเต็มพื้นที่หน้ากระดาษ (A4 หรือจอภาพ) */
+  .receipt-main-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 85vh; /* ดึงความสูงลงมาเผื่อระยะขอบกระดาษ */
+    justify-content: space-between; /* จัดเนื้อหาบนสุด และล่างสุดให้แยกห่างจากกันอัตโนมัติ */
+  }
+
+  /* ส่วนเนื้อหาตารางจะขยายตัวตามปกติ */
+  .receipt-content-body {
+    flex-grow: 1;
+  }
+
+  /* บล็อกยอดรวมจะถูกตรึงและดันลงไปอยู่ขอบล่างสุดของใบเสร็จเสมอ */
+  .receipt-footer-total {
+    margin-top: auto; /* แรงผลักอัตโนมัติจากด้านบน */
+    padding-top: 20px;
+
+  }
+}

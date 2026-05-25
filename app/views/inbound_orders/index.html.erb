@@ -30,11 +30,12 @@
       <thead class="table-light">
         <tr class="text-center">
           <th style="width: 15%;">Inbound No.</th>
-          <th style="width: 15%;">Date</th>
+          <th style="width: 10%;">Date</th>
           <th style="width: 30%;">Supplier Name</th>
-          <th style="width: 15%;">Total Price</th>
+          <th style="width: 10%;">Total Price</th>
           <th style="width: 15%;">Payment Method</th>
           <th style="width: 10%;">Status</th>
+          <th style="width: 10%;" class="text-center">Management</th>
         </tr>
       </thead>
       <tbody>
@@ -46,6 +47,10 @@
             <td class="text-end text-muted"><%= number_to_currency(inbound_order.inbound_items.sum { |item| item.unit_cost * item.quantity }, unit: "B", precision: 2, format: "%n %u") %></td>
             <td class="text-center fw-medium"><%= inbound_order.payment_method %></td>
             <td class="text-center text-muted"><%= inbound_order.status %></td>
+            <td class="text-center">
+            <%= link_to "Edit", edit_inbound_order_path(inbound_order), class: "btn btn-sm btn-warning" %>
+            <%= link_to "Delete", inbound_order_path(inbound_order), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-sm btn-danger" %>
+          </td>
           </tr>
         <% end %>
       </tbody>

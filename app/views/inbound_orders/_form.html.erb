@@ -21,7 +21,9 @@
                       as: :string, # บังคับโครงสร้างหลักเป็นสตริงตัวเดียว
                       input_html: {
                       type: 'date', # เปลี่ยนเป็นช่องปฏิทินหน้าต่างเดียวแบบคีย์ง่าย (หรือใช้ 'datetime-local' ถ้าอยากให้เลือกเวลาได้ด้วย)
-                      class: "form-control py-2" } %>
+                      class: "form-control py-2",
+                      # บรรทัดสำคัญ: ดึงค่าเดิมออกมาฟอร์แมตเป็น ปีกระดกลบเดือนลบวัน เพื่อเปิดทางให้กล่อง HTML Date ยอมรับค่ามาโชว์
+                      value: f.object.received_at&.strftime('%Y-%m-%d') } %>
                       <!-- as: :datetime, # หรือใช้ :date ถ้าต้องการแค่วันที่ ไม่ระบุเวลา
                       input_html: { class: "form-control py-2" } %> -->
       </div>
@@ -45,7 +47,7 @@
       </div>
       <div class="col-md-6">
         <%= f.input :status,
-                    collection: [["รอดำเนินการ", "pending"], ["สำเร็จ", "completed"]],
+                    collection: [["รอดำเนินการ", "pending"], ["สำเร็จ", "completed"], ["ยกเลิก", "cancelled"]],
                     include_blank: false,
                     input_html: { class: "form-select shadow-sm" } %>
       </div>

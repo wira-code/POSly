@@ -1,2 +1,57 @@
-<h1>InboundOrders#show</h1>
-<p>Find me in app/views/inbound_orders/show.html.erb</p>
+
+<div class="receipt-container p-4 bg-white shadow-sm" id="printable-area">
+  <div class="text-center mb-4">
+    <h2>Invoice Number</h2>
+    <p>เลขที่บิล: #<%= @inbound_order.inbound_number %> | วันที่: <%= @inbound_order.received_at.strftime("%d/%m/%Y") %></p>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-6">
+      <strong>Supplier details:</strong><br>
+      คุณ <%= @inbound_order.supplier_name %><br>
+      โทร: <%= @inbound_order.supplier_phone %><br>
+      ที่อยู่: <%= @inbound_order.supplier_address %>
+    </div>
+    <!--
+    <div class="col-6 text-end">
+     <strong>ผู้ขาย:</strong> <%#= current_user&.name || "พนักงาน" %>
+    </div>
+     -->
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>รายการ</th>
+        <th class="text-end">ราคา/หน่วย</th>
+        <th class="text-center">จำนวน</th>
+        <th class="text-end">ยอดรวม</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @inbound_order.inbound_items.each do |item| %>
+        <tr>
+          <td><%= item.product.name %></td>
+          <td class="text-end"><%= number_to_currency(item.unit_cost, unit: "B", precision: 2) %></td>
+          <td class="text-center"><%= item.quantity %></td>
+          <td class="text-end"><%= number_to_currency(item.unit_cost * item.quantity, unit: "€", precision: 2) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+    <div class="text-end fs-4 fw-bold">
+    รวมทั้งสิ้น:
+    <%= number_to_currency(@inbound_order.inbound_items.sum { |item| item.unit_cost * item.quantity }, unit: "€", precision: 2) %>
+  </div>
+
+
+</div>
+
+<div class="mt-4 text-center no-print">
+  <%= link_to "Back", inbound_orders_path, class: "btn btn-lg btn-secondary " %>
+  <button onclick="window.print()" class="btn btn-primary btn-lg">
+    <i class="bi bi-printer"></i> Print
+  </button>
+  <%= link_to "Edit", edit_inbound_order_path(@inbound_order), class: "btn btn-lg btn-warning " %>
+</div>

@@ -21,7 +21,7 @@ class OrdersController < ApplicationController
   end
 
   def show
-    @order = Order.find(params[:id])
+     @order = Order.find(params[:id])
   end
 
   def new
@@ -58,6 +58,7 @@ class OrdersController < ApplicationController
 
   def edit
     @order = Order.find(params[:id])
+    @order.order_items.build if @order.order_items.blank?
   end
 
   # app/controllers/orders_controller.rb
@@ -80,6 +81,13 @@ class OrdersController < ApplicationController
       # 🔴 บันทึกไม่ผ่าน -> แสดงหน้าเดิมซ้ำ (Edit) พร้อมส่งสเตตัสแจ้งเตือนกลับไป
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @order = Order.find(params[:id])
+    @order.destroy
+    # 🌟 ตรวจสอบให้มั่นใจว่าตรงนี้สั่งเตะกลับมาที่ orders_path (หน้า index) ไม่ใช่ @order นะครับ
+    redirect_to orders_path, notice: "ลบรายการคำสั่งซื้อเรียบร้อยแล้ว", status: :see_other
   end
 
   private

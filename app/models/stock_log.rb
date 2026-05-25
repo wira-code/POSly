@@ -8,11 +8,14 @@ class StockLog < ApplicationRecord
   after_create :update_product_quantity
 
   def update_product_quantity
-    # ✅ เพิ่มบรรทัดนี้: ถ้าเป็นประวัติเริ่มต้น (Initial Stock) ไม่ต้องไปบวกเลขซ้ำ
+    # ✅ เพิ่มบรรทัดนี้: ถ้าเป็นประวัติเริ่มต้น (Initial Stock) ไม่ต้องไปบวกเลขซ้ำ ป้องกันการบวกเบิ้ลจาก Initial Stock
     # เพราะเราใส่ค่า quantity ไว้ใน Product ตั้งแต่ตอนสร้างแล้ว
     return if log_type == "Initial Stock"
     # เอาจำนวนใน Product ปัจจุบัน มาบวกกับค่าที่เปลี่ยนไปใน Log
-    new_quantity = product.quantity + change_amount
-    product.update!(quantity: new_quantity)
+    # วิธีแก้ให้ปลอดภัยและถูกต้อง: สั่งให้ Database เป็นคนบวก/ลบเลขจากยอดล่าสุดในระบบทันที
+    # ข้อดี: ไม่ต้องกลัวคนกดพร้อมกัน และโค้ดกระชับขึ้นมาก
+    product.increment!(:quantity, change_amount)
+    # new_quantity = product.quantity + change_amount
+    # product.update!(quantity: new_quantity)
   end
 end

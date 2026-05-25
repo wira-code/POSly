@@ -40,6 +40,31 @@ class InboundOrdersController < ApplicationController
     end
   end
 
+  def edit
+    @inbound_order = InboundOrder.find(params[:id])
+  end
+
+  def update
+    @inbound_order = InboundOrder.find(params[:id])
+
+    # ล้างเครื่องหมายคอมม่า (ถ้ามี) ก่อนแปลงเป็นตัวเลขลง Database
+    if params[:inbound_order] && params[:inbound_order][:order_items_attributes]
+      params[:inbound_order][:order_items_attributes].each do |key, item|
+        if item[:unit_price].present?
+          item[:unit_cost] = item[:unit_cost].to_s.gsub(",", "")
+        end
+      end
+    end
+
+    if @inbound_order.update(inbound_order_params)
+      # 🟢 บันทึกผ่าน -> ย้ายหน้ากลับไปที่หน้ารายการทั้งหมด (Index) ทันที
+      redirect_to inbound_orders_path, notice: "อัปเดตรายการขายเรียบร้อยแล้ว"
+    else
+      # 🔴 บันทึกไม่ผ่าน -> แสดงหน้าเดิมซ้ำ (Edit) พร้อมส่งสเตตัสแจ้งเตือนกลับไป
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def inbound_order_params

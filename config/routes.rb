@@ -40,7 +40,7 @@ Rails.application.routes.draw do
 
   resources :categories, except: [ :show ] # ไม่เอาหน้า show เพราะจัดการจบในหน้า index ได้เลย
 
-  resources :inbound_orders, only: [ :index, :show, :new, :create ]
+  resources :inbound_orders, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
 
   root "dashboards#index" # ให้หน้า Dashboard เป็นหน้าแรกของแอป
 end

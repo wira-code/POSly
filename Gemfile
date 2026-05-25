@@ -31,6 +31,8 @@ gem "solid_cable"
 # Global
 gem "simple_form"
 gem "devise"
+gem "chartkick"
+gem "groupdate"
 
 
 # Reduces boot times through caching; required in config/boot.rb

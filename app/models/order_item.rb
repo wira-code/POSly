@@ -1,4 +1,48 @@
 class OrderItem < ApplicationRecord
+  belongs_to :order, optional: true
+  belongs_to :product
+
+  validates :quantity, presence: true, numericality: { greater_than: 0 }
+  validates :unit_price, presence: true
+
+  # ❌ ลบ after_save :adjust_product_stock ออกไปเลยครับ
+  # ❌ ลบ after_destroy :restore_stock_on_destroy ออกไปเลยครับ
+  # เพื่อปล่อยให้ระบบสถานะของ Order (ตัวแม่) เป็นคนควบคุมจังหวะการตัดสต็อกแทน
+
+  # 🌟 Method 1: สำหรับ "หักสต็อกออกจากคลัง" (จะทำงานเมื่อสั่งซื้อสำเร็จ)
+  def trigger_stock_decrease
+    return unless product && quantity.present? && defined?(StockLog)
+
+    order_identifier = order.respond_to?(:order_number) ? order.order_number : order.id
+
+    StockLog.create!(
+      product_id: product.id,
+      change_amount: -self.quantity, # ⚠️ ค่าติดลบ (-) เพราะเป็นการขายสินค้าออกไป
+      log_type: "Sale",              # ประเภทเป็นบิลขาย
+      note: "ขายสินค้าหน้าร้าน บิลหมายเลข: ##{order_identifier}"
+    )
+  end
+
+  # 🌟 Method 2: สำหรับ "คืนสต็อกกลับเข้าคลัง" (จะทำงานเมื่อบิลถูกยกเลิก หรือโดนลบ)
+  def trigger_stock_increase
+    return unless product && quantity.present? && defined?(StockLog)
+
+    order_identifier = order.respond_to?(:order_number) ? order.order_number : order.id
+
+    StockLog.create!(
+      product_id: product.id,
+      change_amount: self.quantity,  # ⚠️ ค่าเป็นบวก (+) เพื่อดึงสต็อกกลับเข้าคลัง
+      log_type: "Return",            # ประเภทเป็นการคืนสินค้า
+      note: "คืนสต็อก/ยกเลิกรายการขาย บิลหมายเลข: ##{order_identifier}"
+    )
+  end
+end
+
+
+
+
+
+=begin
   belongs_to :order
   belongs_to :product
   # 🌟 ตรวจเช็คให้ดี: หากคุณมีสองบรรทัดนี้อยู่ ยอดห้ามส่งมาเป็น 0 หรือว่างเด็ดขาด
@@ -10,6 +54,7 @@ class OrderItem < ApplicationRecord
   # 🌟 ใช้ after_save และ after_destroy ในการควบคุมสต็อก  ต้องเปลี่ยนชื่อตัวเรียกหลัง after_save ให้เป็นชื่อเดียวกับเมธอดด้านล่าง
   after_save :adjust_product_stock
   after_destroy :restore_stock_on_destroy
+  # ลบเพื่อปล่อยให้ระบบสถานะของ Order (ตัวแม่) เป็นคนควบคุมจังหวะการตัดสต็อกแทน
 
   private
 
@@ -87,3 +132,4 @@ end
 #    note: "ขายสินค้า (Order ##{order.id})"
 # )
 # end
+=end

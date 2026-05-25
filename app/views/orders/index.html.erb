@@ -30,22 +30,36 @@
       <thead class="table-light">
         <tr class="text-center">
           <th style="width: 15%;">Order No.</th>
-          <th style="width: 15%;">Date</th>
+          <th style="width: 10%;">Date</th>
           <th style="width: 30%;">Customer Name</th>
-          <th style="width: 15%;">Total Price</th>
+          <th style="width: 10%;">Total Price</th>
           <th style="width: 15%;">Payment Method</th>
           <th style="width: 10%;">Status</th>
+          <th style="width: 10%;" class="text-center">Management</th>
         </tr>
       </thead>
       <tbody>
         <% @orders.each do |order| %>
           <tr class="clickable-row" data-href="<%= order_path(order) %>" style="cursor: pointer;">
             <td class="text-start"><%= order.order_number %></td>
-            <td class="text-start"><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td class="text-start"><%= order.created_at.strftime("%d/%m/%Y") %></td>
             <td class="text-start text-muted"><%= order.customer_name %></td>
             <td class="text-end text-muted"><%= number_to_currency(order.order_items.sum { |item| item.unit_price * item.quantity }, unit: "B", precision: 2, format: "%n %u") %></td>
             <td class="text-center fw-medium"><%= order.payment_method %></td>
             <td class="text-center text-muted"><%= order.status %></td>
+            <td class="text-center">
+            <%= link_to "Edit", edit_order_path(order), class: "btn btn-sm btn-warning " %>
+            <%= button_to "Delete", order_path(order),
+            method: :delete,
+            data: { turbo_confirm: "Are you sure?" },
+            class: "btn btn-sm btn-danger",
+            form: { style: 'display: inline-block;' } %>
+
+            <%#= link_to "Delete", order_path(order),
+            data: { turbo_method: :delete,
+            turbo_confirm: "Are you sure?" },
+            class: "btn btn-sm btn-danger" %>
+          </td>
           </tr>
         <% end %>
       </tbody>
