@@ -1,13 +1,13 @@
 
 <div class="container-fluid py-2">
-  <h2 class="mb-4 fw-bold">📊 Financial Overview Widgets
+  <h1 class="mb-4 fw-bold">📊 Financial Overview Widgets
     <span class="fs-5 text-muted fw-bold  ms-2"> Today: (<%= @current_date %>)</span>
-  </h2>
+  </h1>
 
   <div class="row g-3">
 
     <div class="col-12 col-sm-6 col-md-3">
-      <div class="card h-100 border-0 shadow-sm bg-primary text-dark">
+      <div class="card h-100 border-0 shadow-sm bg-danger-subtle text-dark">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="card-title text-dark-50 mb-0">📌 ยอดขายรวม (Total Sales)</h6>
@@ -16,9 +16,9 @@
           <h3 class="fw-bold mb-1"><%= number_to_currency(@total_sales_today, unit: "฿", precision: 2) %></h3>
           <p class="mb-0 small">
             <% if @sales_growth_percentage >= 0 %>
-              <span class="text-warning">↑ +<%= @sales_growth_percentage %>%</span> เปรียบเทียบกับเมื่อวาน
+              <span class="text-success">↑ +<%= @sales_growth_percentage %>%</span> เปรียบเทียบกับเมื่อวาน
             <% else %>
-              <span class="text-white-50">↓ <%= @sales_growth_percentage %>%</span> เปรียบเทียบกับเมื่อวาน
+              <span class="text-warning-50">↓ <%= @sales_growth_percentage %>%</span> เปรียบเทียบกับเมื่อวาน
             <% end %>
           </p>
         </div>

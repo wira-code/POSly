@@ -1,23 +1,34 @@
 class OrdersController < ApplicationController
   def index
     # 1. ดึงออเดอร์ทั้งหมดขึ้นมาตั้งต้นไว้ก่อน
-    @orders = Order.all
+    @orders = Order.all.order(created_at: :desc)
 
     # 2. ตรวจสอบว่าพนักงานมีการพิมพ์คำค้นหาเข้ามาหรือไม่
     if params[:query].present?
-      search_query = "%#{params[:query].strip}%"
+      # search_query = "%#{params[:query].strip}%"
+      query_param = params[:query].strip
+      @orders = @orders.where("id = ? OR customer_name LIKE ?", query_param, "%#{query_param}%")
 
       # 🌟 สั่งกรองค้นหาจากเลขที่บิล (เปลี่ยนชื่อ :order_number ให้ตรงกับชื่อคอลัมน์ในตาราง Order ของคุณ)
       # และสามารถสั่งให้เสิร์ชหาชื่อลูกค้า (customer_name) ควบคู่ไปด้วยได้เลยในช่องเดียว!
-      @orders = @orders.where(
-        "order_number LIKE ? OR customer_name LIKE ?",
-        search_query,
-        search_query
-    )
+      # @orders = @orders.where(
+      # "order_number LIKE ? OR customer_name LIKE ?",
+      # search_query,
+      # search_query)
     end
 
-  # 3. จัดเรียงลำดับให้บิลล่าสุดขึ้นมาแสดงด้านบนสุด (Optional)
-  @orders = @orders.order(created_at: :asc)
+    # 💳 3. กรองข้อมูลตามช่องทางชำระเงิน (รองรับการกดปุ่มภาษาอังกฤษ แต่เสิร์ชหาภาษาไทยใน DB)
+    if params[:payment_method].present?
+      # แปลงค่าพารามิเตอร์ภาษาอังกฤษที่ส่งมาจากหน้าวิว ให้ตรงกับคำที่บันทึกจริงในฐานข้อมูล
+      mapped_method = case params[:payment_method].downcase
+      when "cash" then "เงินสด"
+      when "transfer" then "โอนเงิน"
+      when "credit card", "card" then "บัตรเครดิต"
+      else params[:payment_method] # เผื่อกรณีค่าหลุดมาเป็นภาษาไทยอยู่แล้ว
+      end
+
+      @orders = @orders.where(payment_method: mapped_method)
+    end
   end
 
   def show

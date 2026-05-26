@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "daily_reports/index"
   get "inbound_orders/index"
   get "inbound_orders/show"
   get "inbound_orders/new"
@@ -41,6 +42,9 @@ Rails.application.routes.draw do
   resources :categories, except: [ :show ] # ไม่เอาหน้า show เพราะจัดการจบในหน้า index ได้เลย
 
   resources :inbound_orders, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+
+  # 🌟 เพิ่มเส้นทางสำหรับ Daily Report (เอาเฉพาะหน้า index เพื่อดูรายงาน)
+  get "daily_report", to: "daily_reports#index", as: :daily_report
 
   root "dashboards#index" # ให้หน้า Dashboard เป็นหน้าแรกของแอป
 end

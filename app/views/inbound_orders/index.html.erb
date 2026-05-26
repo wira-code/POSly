@@ -46,7 +46,11 @@
             <td class="text-start text-muted"><%= inbound_order.supplier_name %></td>
             <td class="text-end text-muted"><%= number_to_currency(inbound_order.inbound_items.sum { |item| item.unit_cost * item.quantity }, unit: "B", precision: 2, format: "%n %u") %></td>
             <td class="text-center fw-medium"><%= inbound_order.payment_method %></td>
-            <td class="text-center text-muted"><%= inbound_order.status %></td>
+            <td class="text-center">
+              <span class="badge fs-6 <%= inbound_order.status == 'completed' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' %> px-3.5 py-2">
+                <%= inbound_order.status %>
+              </span>
+            </td>
             <td class="text-center">
             <%= link_to "Edit", edit_inbound_order_path(inbound_order), class: "btn btn-sm btn-warning" %>
             <%= link_to "Delete", inbound_order_path(inbound_order), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-sm btn-danger" %>

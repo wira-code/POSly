@@ -104,10 +104,14 @@
 
           <a href="#" class="nav-item"><i class="fa-solid fa-location-dot"></i> ตำแหน่งจัดเก็บ</a>
           <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> รายงานยอดขายและกำไร (Sales Report)</a>
-          <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> ประวัติการขาย (Order History)</a>
-          <a href="#" class="nav-item"><i class="fa-solid fa-arrow-right-to-bracket"></i> Daily Report</a>
+          <%= link_to orders_path, class: "nav-item #{'active' if current_page?(orders_path)}" do %>
+            <i class="fa-solid fa-clock-rotate-left"></i> ประวัติการขาย (Order History)
+          <% end %>
+          <%= link_to daily_report_path, class: "nav-item #{'active' if current_page?(daily_report_path)}" do %>
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Daily Report
+          <% end %>
           <%= link_to categories_path, class: "nav-item #{'active' if current_page?(categories_path)}" do %>
-            <i class="fa-solid fa-arrow-right-to-bracket"></i> Categories
+            <i class="fa-solid fa-layer-group"></i> Categories
           <% end %>
         </nav>
       </div>

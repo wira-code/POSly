@@ -1,0 +1,92 @@
+
+<div class="container-fluid py-2">
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+      <h1 class="fw-bold mb-1">Daily Report</h1>
+      <p class="text-muted mb-0">ตรวจสอบและปิดยอดเงินประจำวันของร้าน</p>
+    </div>
+
+    <%= form_with url: daily_report_path, method: :get, class: "d-flex gap-2 align-items-center" do |f| %>
+      <label class="text-nowrap fw-semibold text-muted">เลือกวันที่:</label>
+      <%= f.date_field :date, value: @selected_date, class: "form-control shadow-sm", onchange: "this.form.submit();" %>
+    <% end %>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-3">
+      <div class="card h-100 border-0 shadow-sm bg-white border-start border-success border-4">
+        <div class="card-body">
+          <h6 class="text-muted fw-bold mb-2">💵 Cash</h6>
+          <h3 class="fw-bold text-success mb-0"><%= number_to_currency(@cash_total, unit: "฿", precision: 2) %></h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="card h-100 border-0 shadow-sm bg-white border-start border-info border-4">
+        <div class="card-body">
+          <h6 class="text-muted fw-bold mb-2">📱 Transfer</h6>
+          <h3 class="fw-bold text-info mb-0"><%= number_to_currency(@transfer_total, unit: "฿", precision: 2) %></h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="card h-100 border-0 shadow-sm bg-white border-start border-purple border-4" style="border-left-color: #6f42c1 !important;">
+        <div class="card-body">
+          <h6 class="text-muted fw-bold mb-2">💳 Credit Card</h6>
+          <h3 class="fw-bold mb-0" style="color: #6f42c1;"><%= number_to_currency(@credit_total, unit: "฿", precision: 2) %></h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="card h-100 border-0 shadow-sm text-white" style="background-color: #212529;">
+        <div class="card-body">
+          <h6 class="text-white-50 fw-bold mb-2">🏆 Total Amount</h6>
+          <h3 class="fw-bold text-warning mb-0"><%= number_to_currency(@daily_grand_total, unit: "฿", precision: 2) %></h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-0 py-3">
+      <h5 class="mb-0 fw-bold"><i class="bi bi-list-check me-2"></i>รายการบิลทั้งหมด (<%= @orders.count %> บิล)</h5>
+    </div>
+    <div class="card-body pt-0">
+      <% if @orders.any? %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>เลขที่บิล</th>
+                <th>ชื่อลูกค้า</th>
+                <th class="text-center">ช่องทางชำระเงิน</th>
+                <th class="text-end">ยอดสุทธิ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @orders.each do |order| %>
+                <tr>
+                  <td class="fw-bold text-secondary"><%= order.id %></td>
+                  <td><%= order.customer_name.present? ? order.customer_name : "ลูกค้าหน้าร้าน" %></td>
+                  <td class="text-center">
+                    <span class="badge bg-light text-dark border"><%= order.payment_method %></span>
+                  </td>
+                  <td class="text-end fw-bold text-dark">
+                    <%= number_to_currency(order.total_price, unit: "฿", precision: 2) %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+          <span>ยังไม่มีรายการขายที่สำเร็จในวันที่เลือก</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+</div>

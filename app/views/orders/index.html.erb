@@ -1,7 +1,7 @@
 
 <div class="main-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="fw-bold text-primary">Outbound/Sales</h1>
+    <h1 class="fw-bold text-primary">📜 Outbound/Sales</h1>
     <%= link_to "+ New Order", new_order_path, class: "btn btn-success btn-lg shadow-sm" %>
   </div>
 
@@ -20,7 +20,22 @@
       <%= link_to "Clear", orders_path, style: "margin-left: 10px; color: #666; text-decoration: none;" %>
     <% end %>
   <% end %>
-</div>
+
+    <div class="mb-0">
+      <%= link_to "ทั้งหมด",
+                  orders_path,
+                  class: "btn #{params[:payment_method].blank? ? 'btn-secondary' : 'btn-outline-secondary'}" %>
+
+      <% ["Cash", "Transfer", "Credit Card"].each do |method| %>
+        <%# เช็คว่าถ้าปัจจุบันเปิดดูช่องทางนี้อยู่ ให้ปุ่มไฮไลท์เป็นสีน้ำเงินทึบ %>
+        <% is_active = params[:payment_method] == method %>
+
+        <%= link_to method,
+                    orders_path(payment_method: method, search: params[:search]),
+                    class: "btn #{is_active ? 'btn-primary' : 'btn-outline-primary'} ms-1" %>
+      <% end %>
+    </div>
+  </div>
 
 <%# Turbo Frame ครอบตารางสินค้า %>
 <%= turbo_frame_tag "products" do %>
@@ -46,7 +61,11 @@
             <td class="text-start text-muted"><%= order.customer_name %></td>
             <td class="text-end text-muted"><%= number_to_currency(order.order_items.sum { |item| item.unit_price * item.quantity }, unit: "B", precision: 2, format: "%n %u") %></td>
             <td class="text-center fw-medium"><%= order.payment_method %></td>
-            <td class="text-center text-muted"><%= order.status %></td>
+            <td class="text-center">
+              <span class="badge fs-6 <%= order.status == 'completed' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' %> px-3.5 py-2">
+                <%= order.status %>
+              </span>
+            </td>
             <td class="text-center">
             <%= link_to "Edit", edit_order_path(order), class: "btn btn-sm btn-warning " %>
             <%= button_to "Delete", order_path(order),
