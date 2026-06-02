@@ -1,4 +1,8 @@
 class OrdersController < ApplicationController
+  before_action :authenticate_user!
+
+  # 🔒 ล็อกเฉพาะแอ็กชัน destroy (ลบ) และ edit/update ให้เข้าได้เฉพาะ admin
+  before_action :ensure_admin!, only: [ :edit, :update, :destroy ]
   def index
     # 1. ดึงออเดอร์ทั้งหมดขึ้นมาตั้งต้นไว้ก่อน
     @orders = Order.all.order(created_at: :desc)
@@ -114,5 +118,11 @@ class OrdersController < ApplicationController
     # ข้อสำคัญ 🌟: ใน array ของ order_items_attributes ต้องมี :id และ :_destroy อยู่ด้วยเสมอ!
     order_items_attributes: [ :id, :product_id, :quantity, :unit_price, :_destroy ]
   )
+  end
+
+  def ensure_admin!
+    unless current_user&.admin?
+      redirect_to orders_path, alert: "🚫 เฉพาะผู้จัดการร้านเท่านั้นที่สามารถแก้ไขหรือลบข้อมูลได้"
+    end
   end
 end

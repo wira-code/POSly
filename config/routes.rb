@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :users
   get "daily_reports/index"
   get "inbound_orders/index"
   get "inbound_orders/show"
